@@ -1,0 +1,92 @@
+\documentclass{beamer}
+
+% Theme
+\usetheme{Madrid}
+
+% Packages
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+% Title Page
+\title{Commit-Connect}
+\author{Code Blooded}
+\date{\today}
+
+\begin{document}
+
+% Title Slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% Introduction Slide
+\begin{frame}{Introduction}
+    \begin{itemize}
+        \item Commit-Connect is a platform that helps developers find open-source projects based on their skills.
+        \item Uses GitHub API and Gemini AI to recommend repositories.
+    \end{itemize}
+\end{frame}
+
+% Problem Statement
+\begin{frame}{Problem Statement}
+    \begin{itemize}
+        \item Many developers struggle to find relevant open-source projects.
+        \item Manual searching is time-consuming.
+        \item Need an AI-driven approach for better recommendations.
+    \end{itemize}
+\end{frame}
+
+% Features
+\begin{frame}{Features}
+    \begin{itemize}
+        \item GitHub login with Personal Access Token authentication
+        \item Fetch and display user repositories
+        \item Recommend open-source projects based on interests
+        \item Visualize user profile statistics
+    \end{itemize}
+\end{frame}
+
+% Tech Stack
+\begin{frame}{Tech Stack}
+    \begin{itemize}
+        \item Frontend: Streamlit
+        \item Backend: Python
+        \item APIs: GitHub API, Gemini AI
+        
+    \end{itemize}
+\end{frame}
+
+% Workflow / Methodology
+\begin{frame}{Workflow}
+    \begin{enumerate}
+        \item User logs in using GitHub PAT
+        \item Fetches repositories and languages used
+        \item Queries Gemini AI for project recommendations
+        \item Displays relevant repositories and issues
+    \end{enumerate}
+\end{frame}
+
+% Demo
+\begin{frame}{Demo}
+    
+\end{frame}
+
+% Future Scope
+\begin{frame}{Future Scope}
+    \begin{itemize}
+        \item Improve AI-based recommendations
+        \item Add filtering by difficulty level
+        \item Expand to other coding platforms like GitLab
+    \end{itemize}
+\end{frame}
+
+% Conclusion
+\begin{frame}{Conclusion}
+    \begin{itemize}
+        \item Commit-Connect simplifies open-source project discovery.
+        \item Helps developers contribute effectively.
+        \item Future improvements will enhance personalization.
+    \end{itemize}
+\end{frame}
+
+\end{document}

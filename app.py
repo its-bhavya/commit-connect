@@ -146,3 +146,6 @@ elif page == "Find Projects":
 elif page == "Profile Visualization":
     st.title("📊 Visualize Your GitHub Profile")
     st.write("This section will generate interactive visualizations of your GitHub activity.")
+
+
+
