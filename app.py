@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
+from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
 
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
@@ -128,6 +129,18 @@ elif page == "Your Top Languages":
 elif page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
+    prompt = st.chat_input("What kind of projects are you looking for to contribute? ")
+    if prompt:
+        ans_dict = parse_user_prompt(prompt)
+        #st.write(ans_dict)
+        languages, frameworks_libraries, tools, difficulty, filters = get_filters(prompt)
+        #st.write(languages, frameworks_libraries, tools, difficulty, filters)
+        query, url= build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
+        st.write(query)
+        st.link_button(label="Click Here!", url=url)
+        #ans = find_github_issues(prompt)
+        #st.write(ans)
+
 
 # Profile Visualization Page
 elif page == "Profile Visualization":
