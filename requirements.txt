@@ -1,2 +1,9 @@
 streamlit
 requests
+datetime
+matplotlib
+math
+google-generativeai
+python-dotenv
+json
+urllib
