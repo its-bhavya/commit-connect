@@ -5,6 +5,7 @@ import json
 import re
 import requests
 import urllib
+import streamlit as st
 
 
 load_dotenv(find_dotenv())
@@ -136,8 +137,9 @@ def build_issue_query(languages, frameworks, tools, difficulty, filters):
     query_parts = []
 
     # Add languages
-    for lang in languages:
-        query_parts.append(f"language:{lang}")
+    if languages:
+        for lang in languages:
+            query_parts.append(f"language:{lang}")
 
     # Clean and join frameworks, tools, filters
     all_labels = []
@@ -175,12 +177,11 @@ def build_issue_query(languages, frameworks, tools, difficulty, filters):
     url = f"https://api.github.com/search/issues?q={encoded_query}"
     return query, url 
 
-
+@st.cache_data
 def fetch_issues_from_github(query_url):
     headers = {
         "Accept": "application/vnd.github+json"
     }
-
     response = requests.get(query_url, headers=headers)
 
     if response.status_code == 200:
@@ -200,3 +201,4 @@ def find_github_issues(user_input):
     results = fetch_issues_from_github(query_url)
 
     return results
+

@@ -3,6 +3,7 @@ import requests
 import matplotlib.pyplot as plt
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
+from display_issues import display_issues
 
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
@@ -101,15 +102,25 @@ elif page == "Find Projects":
     st.write("This section will help you find open-source issues to contribute to.")
     prompt = st.chat_input("What kind of projects are you looking for to contribute? ")
     if prompt:
-        ans_dict = parse_user_prompt(prompt)
-        #st.write(ans_dict)
+        result = parse_user_prompt(prompt)
+        #st.write(result)
         languages, frameworks_libraries, tools, difficulty, filters = get_filters(prompt)
-        #st.write(languages, frameworks_libraries, tools, difficulty, filters)
-        query, url= build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
-        st.write(query)
-        st.link_button(label="Click Here!", url=url)
-        #ans = find_github_issues(prompt)
-        #st.write(ans)
+        #query, query_url = build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
+        #st.write(query)
+        json_data = find_github_issues(user_input=prompt)
+        total_issues = len(json_data)
+
+        if languages:
+            languages = ','.join(languages).title()
+        if frameworks_libraries:
+            frames = ','.join(frameworks_libraries).title()
+        if tools:
+            tools = ','.join(tools).title()
+        if filters:
+            filters = ",".join(filters).title()
+        
+        st.markdown(f"### Showing {total_issues} issues")
+        display_issues(json_data)
 
 # Profile Visualization Page
 elif page == "Profile Visualization":
