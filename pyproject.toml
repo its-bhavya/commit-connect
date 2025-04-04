@@ -1,0 +1,11 @@
+[project]
+name = "commit-connect"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dspy>=2.6.16",
+    "litellm>=1.63.7",
+    "matplotlib>=3.10.1",
+]
