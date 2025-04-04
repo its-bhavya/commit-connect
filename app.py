@@ -19,7 +19,7 @@ def set_background():
     """
     Set a full-page background image in Streamlit using a web link.
     """
-    image_url = "https://images.unsplash.com/photo-1614851099511-773084f6911d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    image_url = "https://images.unsplash.com/photo-1650473395434-8674d953ef2f?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     
     bg_image = f"""
     <style>
@@ -28,7 +28,10 @@ def set_background():
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
+            background-color: black;
         }}
+
+        
     
     
         
@@ -38,6 +41,8 @@ def set_background():
             border-radius: 8px;
             padding: 8px 16px;
         }}
+
+        
         .stButton > button:hover {{
             background-color: #ff9800 !important;
             color: white !important;
@@ -81,7 +86,7 @@ if page == "Home":
     </style>
     <div class="center-container">
         <h1> Commit-Connect</h1>
-        <p style="font-size: 18px;">Find open-source projects that match your skills!</p>
+        <p style="font-size: 22px;">Find open-source projects that match your skills!</p>
     </div>
     """,
     unsafe_allow_html=True
