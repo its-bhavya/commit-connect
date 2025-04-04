@@ -13,6 +13,70 @@ from display_issues import display_issues
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    /* Sidebar base style */
+    [data-testid="stSidebar"] {
+        background-color: #0f0f0f;
+        padding: 2rem 1rem;
+        border-radius: 0 25px 25px 0;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+        transition: all 0.3s ease;
+    }
+
+    /* Sidebar widgets */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 3vh;
+        padding-bottom: 0.5vh;
+    }
+
+    /* Inputs */
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] select,
+    [data-testid="stSidebar"] textarea {
+        background-color: #1f1f1f !important;
+        color: white !important;
+        border: 1px solid #333 !important;
+        border-radius: 10px !important;
+        padding: 1.5rem !important;
+    }
+
+    /* Buttons */
+    [data-testid="stSidebar"] button {
+        background-color: #292929 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+        padding: 0.6rem 1rem !important;
+        transition: background-color 0.3s ease;
+    }
+
+    [data-testid="stSidebar"] button:hover {
+        background-color: #444 !important;
+        cursor: pointer;
+    }
+
+    /* Titles or headers in sidebar */
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3 {
+        color: #f39c16 !important;
+        margin-top: 1.5rem;
+    }
+
+    /* Optional: Add a border line at the bottom of each section */
+    [data-testid="stSidebar"] .block-container > div {
+        border-bottom: 1px solid #333;
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 def set_background():
