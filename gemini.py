@@ -7,9 +7,9 @@ import requests
 import urllib
 import streamlit as st
 
-
-load_dotenv(find_dotenv())
-genai_api_key = os.getenv("gemini_api")
+genai_api_key= st.secrets["GEMINI_KEY"]
+#load_dotenv(find_dotenv())
+#genai_api_key = os.getenv("gemini_api")
 genai.configure(api_key=genai_api_key)
 
 def parse_user_prompt(text):
