@@ -17,15 +17,15 @@ def parse_user_prompt(text):
         model = genai.GenerativeModel('gemini-2.0-flash')
 
         prompt = f"""
-You are an AI assistant for an open source contribution website that extracts structured filters from user prompts. The output you return will used to filter what projects we recommend the user. The user prompt might also include what they **do not** want in their contribution projects. 
-You must infer the user's intent even if they don't explicitly say the filter.
+You are an advanced AI assistant designed to support an open-source contribution platform by parsing user-submitted prompts and extracting structured filters to refine project recommendations. Users may describe what they are looking for in a project—including preferred or excluded technologies, tools, and project difficulty levels—either explicitly or implicitly. Your role is to accurately infer and extract relevant information, even when it's not directly stated.
 
-Given a prompt like:
-"I want React projects that don't use complex state management"
+You must identify and categorize the following from the user's prompt:
 
-You should include:
-"other_filters": ["simple state", "no Redux"]
-
+-**Programming languages**
+-**Frameworks and libraries (Like React, Flask, Streamlit, Next.js, Node, Django, etc)**
+-**Tools**
+-**Project difficulty level (Beginner, Intermediate, Advanced, or None)**
+-**Other relevant tags, keywords, or filters (e.g., domains like "machine learning", "climate", or "frontend", or preferences like "no corporate repos")**
 ---
 
 Examples:
@@ -33,7 +33,8 @@ Examples:
 Prompt: "Looking for beginner-friendly Django bugs"
 →
 {{
-  "languages": ["Python", "Django"],
+  "languages": ["Python"],
+  "frameworks":["Django"]
   "difficulty": "Beginner",
   "other_filters": ["bug"]
 }}
@@ -41,9 +42,37 @@ Prompt: "Looking for beginner-friendly Django bugs"
 Prompt: "I want React projects that don't use Redux"
 →
 {{
-  "languages": ["React"],
+  "languages": [],
+  "frameworks":["React"]
   "difficulty": "Intermediate",
   "other_filters": ["no Redux", "simple state"]
+}}
+
+Prompt: "I'm good with JavaScript and want to contribute to React or Vue projects that use TypeScript. I'd prefer if they avoid Redux or complicated state management. Something that involves UI improvements or animations would be cool. Please nothing with GraphQL."
+→
+{{
+  "languages": ["JavaScript", "TypeScript"],
+  "frameworks": ["React", "Vue"],
+  "difficulty": "Intermediate",
+  "other_filters": ["UI", "animations", "no Redux", "no complex state", "no GraphQL"]
+}}
+
+Prompt: "Looking for beginner-friendly Python repos, preferably Flask or Django, but I’m more into fixing bugs or writing tests than building new features. Don't want anything with machine learning — just basic backend stuff, maybe API routes or authentication flows."
+→
+{{
+  "languages": ["Python"],
+  "frameworks": ["Flask", "Django"],
+  "difficulty": "Beginner",
+  "other_filters": ["bug", "testing", "backend", "API", "authentication", "no machine learning"]
+}}
+
+Prompt: "I want to work on projects related to data visualization using D3.js or Plotly. I'm intermediate in JavaScript and okay with some Python. Would be nice if the issues involve improving dashboards or interactive charts. Not interested in setting up servers or CI/CD pipelines."
+→
+{{
+  "languages": ["JavaScript", "Python"],
+  "frameworks": ["D3.js", "Plotly"],
+  "difficulty": "Intermediate",
+  "other_filters": ["data visualization", "dashboards", "interactive charts", "no servers", "no CI/CD"]
 }}
 
 Given this prompt:
