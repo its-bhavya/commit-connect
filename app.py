@@ -2,7 +2,9 @@ import streamlit as st
 import requests
 import matplotlib.pyplot as plt
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
+from utils.github_api import search_repositories_by_language
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
+from display_issues import display_issues
 
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
@@ -27,7 +29,7 @@ set_background_and_style()
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages", "Find Projects", "Profile Visualization"])
+page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages","Project by Language", "Find Projects", "Profile Visualization"])
 
 # Home Page
 if page == "Home":
@@ -113,26 +115,63 @@ elif page == "Your Top Languages":
     else:
         st.warning("Please log in first on the 'GitHub Login' page.")
 
+
+# project by languages
+elif page == "Project by Language":
+    st.title("🎯 Repositories by Language")
+
+    pat = st.text_input("Enter your GitHub Personal Access Token (PAT)", type="password", key="lang_pat")
+
+    selected_languages = st.multiselect(
+        "Select languages you want to filter by:",
+        ["Python", "JavaScript", "Java", "HTML", "C++", "Go", "C", "TypeScript"]
+    )
+
+    min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
+    recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
+
+    if st.button("🔍 Fetch Repositories"):
+        if pat and selected_languages:
+            repos = search_repositories_by_language(pat, selected_languages, min_stars, recent_days)
+
+            if "error" in repos:
+                st.error(repos["error"])
+            elif len(repos) == 0:
+                st.info("No repositories matched the selected filters.")
+            else:
+                st.success(f"Found {len(repos)} repositories:")
+                for repo in repos:
+                    st.markdown(f"🔗 [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']} | 🧠 {repo['language']} | 🕒 Updated: {repo['updated_at'][:10]}")
+        else:
+            st.warning("Please enter your token and select at least one language.")
+
 # Find Projects Page
 elif page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
     prompt = st.chat_input("What kind of projects are you looking for to contribute? ")
     if prompt:
-        ans_dict = parse_user_prompt(prompt)
-        #st.write(ans_dict)
+        result = parse_user_prompt(prompt)
+        #st.write(result)
         languages, frameworks_libraries, tools, difficulty, filters = get_filters(prompt)
-        #st.write(languages, frameworks_libraries, tools, difficulty, filters)
-        query, url= build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
-        st.write(query)
-        st.link_button(label="Click Here!", url=url)
-        #ans = find_github_issues(prompt)
-        #st.write(ans)
+        #query, query_url = build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
+        #st.write(query)
+        json_data = find_github_issues(user_input=prompt)
+        total_issues = len(json_data)
+
+        if languages:
+            languages = ','.join(languages).title()
+        if frameworks_libraries:
+            frames = ','.join(frameworks_libraries).title()
+        if tools:
+            tools = ','.join(tools).title()
+        if filters:
+            filters = ",".join(filters).title()
+        
+        st.markdown(f"### Showing {total_issues} issues")
+        display_issues(json_data)
 
 # Profile Visualization Page
 elif page == "Profile Visualization":
     st.title("📊 Visualize Your GitHub Profile")
     st.write("This section will generate interactive visualizations of your GitHub activity.")
-
-
-
