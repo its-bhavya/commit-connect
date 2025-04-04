@@ -18,6 +18,33 @@ def parse_user_prompt(text):
 
         prompt = f"""
 You are an AI assistant for an open source contribution website that extracts structured filters from user prompts. The output you return will used to filter what projects we recommend the user. The user prompt might also include what they **do not** want in their contribution projects. 
+You must infer the user's intent even if they don't explicitly say the filter.
+
+Given a prompt like:
+"I want React projects that don't use complex state management"
+
+You should include:
+"other_filters": ["simple state", "no Redux"]
+
+---
+
+Examples:
+
+Prompt: "Looking for beginner-friendly Django bugs"
+→
+{{
+  "languages": ["Python", "Django"],
+  "difficulty": "Beginner",
+  "other_filters": ["bug"]
+}}
+
+Prompt: "I want React projects that don't use Redux"
+→
+{{
+  "languages": ["React"],
+  "difficulty": "Intermediate",
+  "other_filters": ["no Redux", "simple state"]
+}}
 
 Given this prompt:
 "{text}"
@@ -28,7 +55,6 @@ Return ONLY a JSON object with the fields:
 - "tools": [list of tools used]
 - "difficulty": "Beginner" | "Intermediate" | "Advanced" | None,
 - "other_filters": [list of useful tags or keywords]
-- "exclude":[list of languages, frameworks, libraries, tools, other things to NOT use]
 
 No markdown or explanation. Only the JSON.
 """
@@ -52,3 +78,24 @@ No markdown or explanation. Only the JSON.
             "error": str(e),
             "raw_response": locals().get("result", "No result")
         }
+
+
+def get_filters(text:str):
+    """
+    Once the prompt has been parsed, this function extracts and returns all the fields and filters.
+    """
+    parsed_prompt = parse_user_prompt(text=text)
+
+    languages = parsed_prompt['languages']
+    frameworks_libraries = parsed_prompt["frameworks and libraries"]
+    tools = parsed_prompt['tools']
+    difficulty = parsed_prompt['difficulty']
+    filters = parsed_prompt['other_filters']
+    
+    
+    #print(f"Languages:\n{languages}")
+    #print(f"Frameworks:\n{frameworks_libraries}")
+    #print(f"Tools:\n{tools}")
+    #print(f"Filters:\n{filters}")
+
+    return languages, frameworks_libraries, tools, difficulty, filters
