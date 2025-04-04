@@ -3,6 +3,9 @@ import os
 from dotenv import load_dotenv, find_dotenv
 import json
 import re
+import requests
+import urllib
+
 
 load_dotenv(find_dotenv())
 genai_api_key = os.getenv("gemini_api")
@@ -115,11 +118,11 @@ def get_filters(text:str):
     """
     parsed_prompt = parse_user_prompt(text=text)
 
-    languages = parsed_prompt['languages']
-    frameworks_libraries = parsed_prompt["frameworks and libraries"]
-    tools = parsed_prompt['tools']
-    difficulty = parsed_prompt['difficulty']
-    filters = parsed_prompt['other_filters']
+    languages = parsed_prompt.get("languages",None)
+    frameworks_libraries = parsed_prompt.get("frameworks and libraries",None)
+    tools = parsed_prompt.get("tools",None)
+    difficulty = parsed_prompt.get("difficulty", None)
+    filters = parsed_prompt.get("other_filters", None)
     
     
     #print(f"Languages:\n{languages}")
@@ -128,3 +131,72 @@ def get_filters(text:str):
     #print(f"Filters:\n{filters}")
 
     return languages, frameworks_libraries, tools, difficulty, filters
+
+def build_issue_query(languages, frameworks, tools, difficulty, filters):
+    query_parts = []
+
+    # Add languages
+    for lang in languages:
+        query_parts.append(f"language:{lang}")
+
+    # Clean and join frameworks, tools, filters
+    all_labels = []
+
+    if frameworks:
+        clean_frameworks = [fw.replace(" ", "-") for fw in frameworks]
+        for framework in clean_frameworks:
+            all_labels.append(framework)
+
+    if tools:
+        clean_tools = [tool.replace(" ", "-") for tool in tools]
+        for tool in clean_tools:
+            all_labels.append(tool)
+
+    if filters:
+        clean_filters = [filt.replace(" ", "-") for filt in filters]
+        for filter in clean_filters:
+            all_labels.append(filter)
+
+    if all_labels:
+        label_string = ",".join(all_labels)
+        query_parts.append(f"label:{label_string}")
+
+
+    # Add difficulty label
+    if difficulty:
+        if difficulty.lower() == "beginner":
+            query_parts.append('label:"good first issue"')
+        elif difficulty.lower() == "intermediate":
+            query_parts.append('label:"help wanted"')
+
+    # Final query
+    query = " ".join(query_parts)
+    encoded_query = urllib.parse.quote_plus(query)
+    url = f"https://api.github.com/search/issues?q={encoded_query}"
+    return query, url 
+
+
+def fetch_issues_from_github(query_url):
+    headers = {
+        "Accept": "application/vnd.github+json"
+    }
+
+    response = requests.get(query_url, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("items", [])
+    else:
+        return {"error": f"GitHub API error {response.status_code}: {response.text}"}
+
+def find_github_issues(user_input):
+    # Parse the prompt
+    languages, frameworks, tools, difficulty, filters = get_filters(user_input)
+
+    # Build query
+    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters)
+
+    # Fetch results
+    results = fetch_issues_from_github(query_url)
+
+    return results
