@@ -29,8 +29,38 @@ elif page == "GitHub Login":
     st.title("🔑 Log in with GitHub")
     st.write("Enter your GitHub Personal Access Token (PAT) to proceed.")
 
-    # PAT Input Field
-    pat = st.text_input("🔐 GitHub Personal Access Token", type="password")
+    if "help_visible" not in st.session_state:
+        st.session_state.help_visible = False
+
+    
+    # PAT Input Field with Help Button
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        pat = st.text_input("🔐 GitHub Personal Access Token", type="password", key="github_pat")
+
+    with col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("❓ Help"):
+            st.session_state.help_visible = not st.session_state.help_visible 
+    
+    if st.session_state.help_visible:
+            st.markdown(
+                """
+                <div style="border-radius: 10px; background-color: #1e293b; padding: 15px; color: white;">
+                    <h4>🔑 How to Generate a GitHub PAT?</h4>
+                    <ol>
+                        <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                        <li>Click <b>'Generate new token'</b></li>
+                        <li>Select <b>'repo'</b> and <b>'read:user'</b> scopes</li>
+                        <li>Copy and paste it here</li>
+                    </ol>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        
+
 
     if st.button("Login"):
         if pat:
