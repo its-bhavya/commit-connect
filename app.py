@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import matplotlib.pyplot as plt
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
-from utils.github_api import fetch_user_repositories_by_language
+from utils.github_api import search_repositories_by_language
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
 from display_issues import display_issues
 
@@ -109,12 +109,12 @@ elif page == "Project by Language":
         ["Python", "JavaScript", "Java", "HTML", "C++", "Go", "C", "TypeScript"]
     )
 
-    min_stars = st.slider("⭐ Minimum Stars", 0, 500, 0)
+    min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
     recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
     if st.button("🔍 Fetch Repositories"):
         if pat and selected_languages:
-            repos = fetch_user_repositories_by_language(pat, selected_languages, min_stars, recent_days)
+            repos = search_repositories_by_language(pat, selected_languages, min_stars, recent_days)
 
             if "error" in repos:
                 st.error(repos["error"])

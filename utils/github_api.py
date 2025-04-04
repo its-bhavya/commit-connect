@@ -37,36 +37,35 @@ def get_language_distribution(repos):
 
 # fecting repo by language 
 
-def fetch_user_repositories_by_language(token, languages=None, min_stars=0, recent_days=90):
+def search_repositories_by_language(token, languages=None, min_stars=0, recent_days=90):
     """
-    Fetch the authenticated user's repositories filtered by language, stars, and updated date.
+    Search public repositories on GitHub based on language, stars, and updated date.
     :param token: GitHub Personal Access Token
     :param languages: List of languages to filter repos
-    :param min_stars: Minimum number of stars the repo should have
-    :param recent_days: How recent (in days) the repo should have been updated
-    :return: List of filtered repositories or error
+    :param min_stars: Minimum stars
+    :param recent_days: Updated within recent_days
+    :return: List of recommended repositories
     """
+    if not languages:
+        return {"error": "Please provide at least one language."}
+
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github.v3+json"
     }
 
-    url = "https://api.github.com/user/repos?per_page=100"
-    response = requests.get(url, headers=headers)
+    recent_cutoff = (datetime.utcnow() - timedelta(days=recent_days)).strftime("%Y-%m-%d")
 
-    if response.status_code != 200:
-        return {"error": f"Failed to fetch repos: {response.status_code} — {response.json().get('message', '')}"}
+    results = []
+    for lang in languages:
+        query = f"language:{lang} stars:>={min_stars} pushed:>={recent_cutoff}"
+        url = f"https://api.github.com/search/repositories?q={query}&sort=stars&order=desc&per_page=20"
 
-    all_repos = response.json()
-    if not languages:
-        languages = []
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            results.extend(data.get("items", []))
+        else:
+            print(f"Error for {lang}: {response.status_code} - {response.json().get('message', '')}")
 
-    recent_cutoff = datetime.utcnow() - timedelta(days=recent_days)
-
-    filtered = [
-        repo for repo in all_repos
-        if repo["language"] and repo["language"].lower() in [lang.lower() for lang in languages]
-        and repo["stargazers_count"] >= min_stars
-        and datetime.strptime(repo["updated_at"], "%Y-%m-%dT%H:%M:%SZ") > recent_cutoff
-    ]
-    return filtered
+    return results
