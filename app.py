@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import matplotlib.pyplot as plt
+from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
 
 # Set Page Title and Layout
@@ -9,16 +10,6 @@ st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
 # Sidebar Navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages", "Find Projects", "Profile Visualization"])
-
-# Function to get GitHub user info
-def get_github_user_info(token):
-    headers = {"Authorization": f"token {token}"}
-    response = requests.get("https://api.github.com/user", headers=headers)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
 
 # Home Page
 if page == "Home":
@@ -63,7 +54,7 @@ elif page == "GitHub Login":
 
     if st.button("Login"):
         if pat:
-            user_data = get_github_user_info(pat)
+            user_data = get_user_profile(pat)
             if user_data:
                 st.session_state.pat = pat  # Store PAT in session state
                 st.success(f"Logged in as {user_data['login']}")
@@ -86,27 +77,6 @@ elif page == "Your Top Languages":
     # Check if PAT exists in session state
     if "pat" in st.session_state and st.session_state.pat:
         pat = st.session_state.pat
-
-        # Function to fetch repositories of the authenticated user
-        def get_user_repos(token):
-            headers = {"Authorization": f"token {token}"}
-            repos_url = "https://api.github.com/user/repos"
-            response = requests.get(repos_url, headers=headers)
-
-            if response.status_code == 200:
-                return response.json()
-            else:
-                st.error("❌ Failed to fetch repositories. Please check your token.")
-                return None
-
-        # Function to count language usage across repositories
-        def get_language_distribution(repos):
-            language_count = {}
-            for repo in repos:
-                language = repo.get("language")
-                if language:
-                    language_count[language] = language_count.get(language, 0) + 1
-            return language_count
 
         # Fetch and process languages
         repos = get_user_repos(pat)
@@ -140,7 +110,6 @@ elif page == "Find Projects":
         st.link_button(label="Click Here!", url=url)
         #ans = find_github_issues(prompt)
         #st.write(ans)
-
 
 # Profile Visualization Page
 elif page == "Profile Visualization":
