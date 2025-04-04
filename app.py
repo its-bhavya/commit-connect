@@ -7,6 +7,24 @@ from gemini import parse_user_prompt, get_filters, build_issue_query, find_githu
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
 
+
+def set_background_and_style():
+    st.markdown("""
+    <style>
+    /* Background */
+    .stApp {
+        background-image: url("https://github.blog/wp-content/uploads/2024/01/Productivity-DarkMode-3.png?resize=800%2C425");
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+set_background_and_style()
+                
+
+
 # Sidebar Navigation
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages", "Find Projects", "Profile Visualization"])
