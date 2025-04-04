@@ -1,5 +1,9 @@
 import streamlit as st
 import requests
+import base64
+
+
+import pandas as pd
 import matplotlib.pyplot as plt
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from utils.github_api import search_repositories_by_language
@@ -10,21 +14,51 @@ from display_issues import display_issues
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
 
 
-def set_background_and_style():
-    st.markdown("""
-    <style>
-    /* Background */
-    .stApp {
-        background-image: url("https://github.blog/wp-content/uploads/2024/01/Productivity-DarkMode-3.png?resize=800%2C425");
-        background-size: cover;
-        background-attachment: fixed;
-        background-position: center;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
-set_background_and_style()
-                
+def set_background():
+    """
+    Set a full-page background image in Streamlit using a web link.
+    """
+    image_url = "https://images.unsplash.com/photo-1614851099511-773084f6911d?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    
+    bg_image = f"""
+    <style>
+        .stApp {{
+            background-image: url('{image_url}');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }}
+    
+    
+        
+        /* Styling interactive elements */
+        .stButton > button {{
+            transition: 0.3s;
+            border-radius: 8px;
+            padding: 8px 16px;
+        }}
+        .stButton > button:hover {{
+            background-color: #ff9800 !important;
+            color: white !important;
+            transform: scale(1.05);
+        }}
+
+        /* Animation for elements */
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+
+        .element {{
+            animation: fadeIn 0.6s ease-in-out;
+        }}
+    </style>
+    """
+    st.markdown(bg_image, unsafe_allow_html=True)
+
+set_background()
+
 
 
 # Sidebar Navigation
@@ -33,8 +67,26 @@ page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages",
 
 # Home Page
 if page == "Home":
-    st.title("🔍 Commit-Connect")
-    st.write("Find open-source projects that match your skills!")
+    st.markdown(
+    """
+    <style>
+        .center-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 65vh; /* Adjust height as needed */
+            text-align: center;
+            flex-direction: column;
+        }
+    </style>
+    <div class="center-container">
+        <h1> Commit-Connect</h1>
+        <p style="font-size: 18px;">Find open-source projects that match your skills!</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # GitHub Login Page
 elif page == "GitHub Login":
@@ -175,3 +227,39 @@ elif page == "Find Projects":
 elif page == "Profile Visualization":
     st.title("📊 Visualize Your GitHub Profile")
     st.write("This section will generate interactive visualizations of your GitHub activity.")
+    # User Input for GitHub Username
+    username = st.text_input("Enter GitHub Username", "octocat")
+
+    if st.button("Fetch Data"):
+    # Fetch GitHub Data
+        url = f"https://api.github.com/users/{username}/repos"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            repos = response.json()
+
+        # Extract Data
+            repo_names = [repo["name"] for repo in repos]
+            stars = [repo["stargazers_count"] for repo in repos]
+            forks = [repo["forks_count"] for repo in repos]
+
+        # Convert to DataFrame
+            df = pd.DataFrame({"Repository": repo_names, "Stars": stars, "Forks": forks})
+
+        # Display Table
+            st.subheader("📌 Repository Data")
+            st.dataframe(df)
+
+        # Plot Chart
+            st.subheader("⭐ Stars per Repository")
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.barh(df["Repository"], df["Stars"], color="orange")
+            ax.set_xlabel("Stars")
+            ax.set_ylabel("Repository")
+            ax.set_title("GitHub Stars per Repository")
+            st.pyplot(fig)
+        
+
+        else:
+            st.error("Failed to fetch data. Check the username and try again.")
+
