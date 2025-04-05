@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import base64
 import html
+from datetime import datetime
+
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -516,15 +518,58 @@ elif st.session_state.page == "Find Projects":
         display_issues(json_data)
 
 # Profile Visualization Page
+# Profile Visualization Page
 elif st.session_state.page == "Profile Visualization":
+    import requests
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    import plotly.express as px
+    from datetime import datetime
+    from collections import Counter
+
     st.title(":material/bar_chart: Visualize Your GitHub Profile")
-    #use stored pat
+
+     # 👇 Custom background image ONLY for this page
+    profile_bg = '''
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background-image: url("https://img.freepik.com/free-vector/dark-gradient-background-with-copy-space_53876-99548.jpg?t=st=1743849597~exp=1743853197~hmac=52d9538a89f25a183bf9633bcb4aa2fd3d709e6c37f9f2ca0ea7a62e6e277934&w=1380");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    [data-testid="stHeader"] {
+        background: rgba(0,0,0,0);
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #0A0F1C;
+        padding: 2rem 1rem;
+        border-radius: 0 25px 25px 0;
+        box-shadow: 4px 0 15px rgba(0,0,0,0.4);
+        transition: all 0.3s ease;
+    }
+
+    .stDataFrame, .stPlotlyChart {
+        
+        border-radius: 10px;
+        padding: 1rem;
+    }
+    </style>
+    '''
+    st.markdown(profile_bg, unsafe_allow_html=True)
+
+    # Use stored PAT
     if "pat" in st.session_state and st.session_state.pat:
         pat = st.session_state.pat
         headers = {"Authorization": f"token {pat}"}
+    else:
+        st.error("GitHub PAT not found. Please login again.")
+        st.stop()
 
     if st.button("Fetch Data"):
-    # Fetch GitHub Data
         url = f"https://api.github.com/user"
         response = requests.get(url, headers=headers)
 
@@ -532,35 +577,96 @@ elif st.session_state.page == "Profile Visualization":
             user_data = response.json()
             username = user_data.get("login")
             if username:
-                    st.success(f"Logged in as: {username}")
+                st.success(f"Logged in as: {username}")
 
-       # get user repositories 
-            repo_response = requests.get(f"https://api.github.com/users/{username}/repos", headers=headers)
-            if repo_response.status_code == 200:
-                repos = repo_response.json()
+                # Get user repositories
+                repo_response = requests.get(f"https://api.github.com/users/{username}/repos", headers=headers)
+                if repo_response.status_code == 200:
+                    repos = repo_response.json()
 
-        # Extract Data
-            repo_names = [repo["name"] for repo in repos]
-            stars = [repo["stargazers_count"] for repo in repos]
-            forks = [repo["forks_count"] for repo in repos]
+                    # Extract Data
+                    repo_names = [repo["name"] for repo in repos]
+                    stars = [repo["stargazers_count"] for repo in repos]
+                    forks = [repo["forks_count"] for repo in repos]
 
-        # Convert to DataFrame
-            df = pd.DataFrame({"Repository": repo_names, "Stars": stars, "Forks": forks})
+                    # Convert to DataFrame
+                    df = pd.DataFrame({"Repository": repo_names, "Stars": stars, "Forks": forks})
 
-        # Display Table
-            st.subheader("📌 Repository Data")
-            st.dataframe(df)
+                    # 📊 Pretty Bar Chart for Stars
+                    st.subheader("⭐ Stars per Repository")
+                    if not df.empty:
+                        bar_fig = px.bar(
+                            df.sort_values("Stars", ascending=False),
+                            x="Stars",
+                            y="Repository",
+                            orientation="h",
+                            color="Stars",
+                            color_continuous_scale="Sunsetdark",
+                            title="Repository Stars Overview",
+                            labels={"Stars": "Star Count", "Repository": "Repository Name"},
+                        )
+                        bar_fig.update_layout(
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            font=dict(size=14),
+                            title_x=0.5,
+                        )
+                        st.plotly_chart(bar_fig)
+                    else:
+                        st.info("No repository data found.")
 
-        # Plot Chart
-            st.subheader("⭐ Stars per Repository")
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.barh(df["Repository"], df["Stars"], color="orange")
-            ax.set_xlabel("Stars")
-            ax.set_ylabel("Repository")
-            ax.set_title("GitHub Stars per Repository")
-            st.pyplot(fig)
-        
+                    # 📈 Commit History Line Graph
+                    st.subheader("📅 Commit History (Last 30 Days)")
+                    commit_dates = []
 
+                    for repo in repos[:3]:  # Limit to first 3 repos to reduce API load
+                        repo_name = repo["name"]
+                        commits_url = f"https://api.github.com/repos/{username}/{repo_name}/commits"
+                        params = {"per_page": 100}
+                        commits_resp = requests.get(commits_url, headers=headers, params=params)
+
+                        if commits_resp.status_code == 200:
+                            commits = commits_resp.json()
+                            for commit in commits:
+                                try:
+                                    date_str = commit["commit"]["committer"]["date"]
+                                    date_obj = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ").date()
+                                    commit_dates.append(date_obj)
+                                except Exception:
+                                    continue
+
+                    if commit_dates:
+                        commit_df = pd.DataFrame(commit_dates, columns=["date"])
+                        commit_df = commit_df.groupby("date").size().reset_index(name="commits")
+
+                        line_fig = px.line(
+                            commit_df,
+                            x="date",
+                            y="commits",
+                            title="Your GitHub Commit History",
+                            markers=True,
+                            line_shape="spline",
+                            labels={"date": "Date", "commits": "Number of Commits"},
+                        )
+
+                        line_fig.update_layout(
+                            plot_bgcolor="rgba(0,0,0,0)",
+                            paper_bgcolor="rgba(0,0,0,0)",
+                            font=dict(size=14),
+                            title_x=0.5,
+                            hovermode="x unified",
+                        )
+
+                        st.plotly_chart(line_fig)
+                    else:
+                        st.info("No commit data available.")
+
+                    # 📌 Display Table
+                    st.subheader("📋 Repository Data")
+                    st.dataframe(df)
+                else:
+                    st.error("Failed to fetch repositories.")
+            else:
+                st.error("Username not found.")
         else:
-            st.error("Failed to fetch data. Check the username and try again.")
-
+            st.error("Failed to fetch data. Check the token and try again.")
