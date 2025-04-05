@@ -3,7 +3,16 @@ import streamlit as st
 from datetime import datetime, timedelta
 
 
-def get_user_profile(token):
+# Store token here
+token = None
+
+def set_token(pat):
+    global token
+    token = pat
+
+
+def get_user_profile():
+    global token
     """Fetch authenticated user’s GitHub profile"""
     url = "https://api.github.com/user"
     headers = {"Authorization": f"token {token}"}
@@ -15,7 +24,8 @@ def get_user_profile(token):
         return None
     
 # Function to fetch repositories of the authenticated user
-def get_user_repos(token):
+def get_user_repos():
+    global token
     headers = {"Authorization": f"token {token}"}
     repos_url = "https://api.github.com/user/repos"
     response = requests.get(repos_url, headers=headers)
@@ -37,7 +47,7 @@ def get_language_distribution(repos):
 
 # fecting repo by language 
 
-def search_repositories_by_language(token, languages=None, min_stars=0, recent_days=90):
+def search_repositories_by_language(languages=None, min_stars=0, recent_days=90):
     """
     Search public repositories on GitHub based on language, stars, and updated date.
     :param token: GitHub Personal Access Token
@@ -46,6 +56,7 @@ def search_repositories_by_language(token, languages=None, min_stars=0, recent_d
     :param recent_days: Updated within recent_days
     :return: List of recommended repositories
     """
+    global token
     if not languages:
         return {"error": "Please provide at least one language."}
 

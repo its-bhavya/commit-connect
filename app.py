@@ -5,6 +5,7 @@ import base64
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from utils.github_api import set_token
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from utils.github_api import search_repositories_by_language
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
@@ -195,7 +196,8 @@ elif page == "GitHub Login":
 
     if st.button("Login"):
         if pat:
-            user_data = get_user_profile(pat)
+            set_token(pat)
+            user_data = get_user_profile()
             if user_data:
                 st.session_state.pat = pat  # Store PAT in session state
                 st.success(f"Logged in as {user_data['login']}")
@@ -220,17 +222,22 @@ elif page == "Your Top Languages":
         pat = st.session_state.pat
 
         # Fetch and process languages
-        repos = get_user_repos(pat)
+        repos = get_user_repos()
         if repos:
             lang_data = get_language_distribution(repos)
 
             if lang_data:
+                top_languages = sorted(lang_data, key=lang_data.get, reverse=True)[:3]
+                st.session_state.top_languages = top_languages  # 🔥 store it globally
+
                 # Display as a pie chart
                 st.subheader("🛠 Your Top Programming Languages")
                 fig, ax = plt.subplots()
                 ax.pie(lang_data.values(), labels=lang_data.keys(), autopct="%1.1f%%", startangle=140, colors=plt.cm.Paired.colors)
                 ax.axis("equal")  # Ensures pie chart is circular
                 st.pyplot(fig)
+
+                st.success(f"Top languages detected: {', '.join(top_languages)}")
             else:
                 st.info("No language data found in your repositories.")
     else:
@@ -241,19 +248,16 @@ elif page == "Your Top Languages":
 elif page == "Project by Language":
     st.title("🎯 Repositories by Language")
 
-    pat = st.text_input("Enter your GitHub Personal Access Token (PAT)", type="password", key="lang_pat")
+    top_languages = st.session_state.get("top_languages", [])
 
-    selected_languages = st.multiselect(
-        "Select languages you want to filter by:",
-        ["Python", "JavaScript", "Java", "HTML", "C++", "Go", "C", "TypeScript"]
-    )
+    if top_languages:
+        st.success(f"🔍 Searching using your top languages: {', '.join(top_languages)}")
 
     min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
     recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
     if st.button("🔍 Fetch Repositories"):
-        if pat and selected_languages:
-            repos = search_repositories_by_language(pat, selected_languages, min_stars, recent_days)
+            repos = search_repositories_by_language(languages=top_languages, min_stars= min_stars,recent_days =recent_days)
 
             if "error" in repos:
                 st.error(repos["error"])
@@ -263,8 +267,8 @@ elif page == "Project by Language":
                 st.success(f"Found {len(repos)} repositories:")
                 for repo in repos:
                     st.markdown(f"🔗 [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']} | 🧠 {repo['language']} | 🕒 Updated: {repo['updated_at'][:10]}")
-        else:
-            st.warning("Please enter your token and select at least one language.")
+    else:
+        st.warning("Please enter your token and select at least one language.")
 
 # Find Projects Page
 elif page == "Find Projects":
