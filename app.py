@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from utils.github_api import set_token
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from utils.github_api import search_repositories_by_language
-from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
+from gemini import parse_user_prompt, get_filters, find_github_issues, summarize_issue
 
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
@@ -40,7 +40,7 @@ st.markdown(
     .stMarkdown h1, .stMarkdown p {
         color: white !important;
     }
-    h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 {
+    h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 ,, h4, .stMarkdown h4, h5, .stMarkdown h5, h6, .stMarkdown h6{
         color: white !important;
     }
 
@@ -212,8 +212,14 @@ def display_issues(issues):
             safe_title = html.escape(issue["title"])
             st.markdown(f"🔗 [{safe_title}]({issue['html_url']}) | 🏷️ Labels: {', '.join([label['name'] for label in issue['labels']]) if issue['labels'] else 'None'} | {issue['state'].capitalize()} | {"Assigned Already" if issue['assignees'] else 'Unassigned'}")
             if issue['body']:
-                safe_body = html.escape(issue["body"])
-                st.write(f"{issue["body"]}")
+                summary_key = f"summarized_text_{counter}"
+                if summary_key not in st.session_state:
+                    if st.button("Click here to learn more!", key=f"Learn more {counter}"):
+                        # Generate summary only once and store it
+                        st.session_state[summary_key] = summarize_issue(issue['body'])
+                if summary_key in st.session_state:
+                    safe_desc = html.escape(st.session_state[summary_key])
+                    st.write(safe_desc)
             counter += 1
 
     st.markdown("---")
