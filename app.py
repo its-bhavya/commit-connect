@@ -300,17 +300,26 @@ elif page == "Find Projects":
 elif page == "Profile Visualization":
     st.title("📊 Visualize Your GitHub Profile")
     st.write("This section will generate interactive visualizations of your GitHub activity.")
-    # User Input for GitHub Username
-    username = st.text_input("Enter GitHub Username", "octocat")
+    #use stored pat
+    if "pat" in st.session_state and st.session_state.pat:
+        pat = st.session_state.pat
+        headers = {"Authorization": f"token {pat}"}
 
     if st.button("Fetch Data"):
     # Fetch GitHub Data
-        url = f"https://api.github.com/users/{username}/repos"
-        response = requests.get(url)
+        url = f"https://api.github.com/user"
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
-            repos = response.json()
-
+            user_data = response.json()
+            username = user_data.get("login")
+            st.success(f"Logged in as: {username}")
+            if username:
+                    st.success(f"Logged in as: {username}")
+       # get user repositories 
+            repo_response = requests.get(f"https://api.github.com/users/{username}/repos", headers=headers)
+            if repo_response.status_code == 200:
+                repos = repo_response.json()
         # Extract Data
             repo_names = [repo["name"] for repo in repos]
             stars = [repo["stargazers_count"] for repo in repos]
