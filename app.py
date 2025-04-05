@@ -334,7 +334,11 @@ elif page == "Project by Language":
 
     if top_languages:
         st.success(f"🔍 Searching using your top languages: {', '.join(top_languages)}")
-
+         # Let user choose from their top languages
+        selected_languages = st.multiselect(
+            "🔎 Select languages to filter repositories:",
+            top_languages
+        )
     min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
     recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
@@ -350,7 +354,7 @@ elif page == "Project by Language":
                 for repo in repos:
                     st.markdown(f"🔗 [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']} | 🧠 {repo['language']} | 🕒 Updated: {repo['updated_at'][:10]}")
     else:
-        st.warning("Please enter your token and select at least one language.")
+        st.warning(" select at least one language.")
 
 # Find Projects Page
 elif page == "Find Projects":
