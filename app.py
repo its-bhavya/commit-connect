@@ -304,6 +304,21 @@ elif st.session_state.page == "Login":
 
 # Your Top Languages Page
 elif st.session_state.page == "Your Top Languages":
+    # 🖼️ Custom Background CSS (same as Profile Visualization page)
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-image: url("https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-52393.jpg?t=st=1743850268~exp=1743853868~hmac=ac915d333e8a3f6c0049dd4406692545bcb321e4ad2f262524fc8f61776e6cc8&w=1800"); /* Replace with your actual background URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.title(":material/award_star: Your Top Languages")
 
     # Check if PAT exists in session state
@@ -318,30 +333,52 @@ elif st.session_state.page == "Your Top Languages":
             if lang_data:
                 all_languages = sorted(lang_data, key=lang_data.get, reverse=True)
                 top_languages = all_languages[:3]
-                st.session_state.top_languages = top_languages  #Store it globally
+                st.session_state.top_languages = top_languages  # Store it globally
                 st.session_state.all_languages = all_languages
 
                 st.success(f"Top languages detected: {', '.join(top_languages)}")
 
-                # Display as a pie chart
-                fig, ax = plt.subplots(figsize=(4, 4))
+                # 🎨 Beautified Transparent Pie Chart
+                import matplotlib.pyplot as plt
+                import matplotlib as mpl
+
+                # Set a modern font theme
+                mpl.rcParams['font.family'] = 'sans-serif'
+                mpl.rcParams['font.size'] = 10
+
+                # Custom colors
+                colors = ["#FF6F61", "#6B5B95", "#88B04B", "#FFA07A", "#20B2AA", "#FFB347", "#779ECB"]
+
+                # Create Pie Chart with transparent background
+                fig, ax = plt.subplots(figsize=(6, 6), dpi=100, facecolor='none')
+                fig.patch.set_alpha(0.0)  # Transparent figure background
+                ax.set_facecolor('none')  # Transparent axis background
+
                 wedges, texts, autotexts = ax.pie(
                     lang_data.values(),
                     labels=lang_data.keys(),
                     autopct="%1.1f%%",
                     startangle=140,
-                    colors=plt.cm.Paired.colors,
-                    wedgeprops={'edgecolor': 'white', 'linewidth': 2},
-                    textprops={'fontsize': 8},
+                    colors=colors[:len(lang_data)],
+                    wedgeprops={'edgecolor': 'white', 'linewidth': 2, 'antialiased': True},
+                    textprops={'fontsize': 10, 'color': 'white'}
                 )
+
+                for autotext in autotexts:
+                    autotext.set_color('white')
+                    autotext.set_weight('bold')
+                    autotext.set_size(9)
+
                 ax.axis("equal")
+                plt.title("Your Top Languages", fontsize=14, fontweight='bold', color="white")
                 st.pyplot(fig)
 
             else:
                 st.info("No language data found in your repositories.")
+        else:
+            st.warning("Could not fetch repositories. Please try again.")
     else:
         st.warning("Please log in first on the 'Login' page.")
-
 
 # Get Projectss
 elif st.session_state.page == "Get Projects":
