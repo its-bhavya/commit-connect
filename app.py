@@ -13,12 +13,15 @@ from gemini import parse_user_prompt, get_filters, find_github_issues, summarize
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
 
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
+    
 st.markdown(
     """
     <style>
     /* Sidebar base style */
     [data-testid="stSidebar"] {
-        background-color: #0f0f0f;
+        background-color: #0A0F1C;
         padding: 2rem 1rem;
         border-radius: 0 25px 25px 0;
         box-shadow: 4px 0 15px rgba(0,0,0,0.4);
@@ -32,7 +35,49 @@ st.markdown(
         font-size: 3vh;
         padding-bottom: 0.5vh;
     }
+    
+    /* Inputs */
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] select,
+    [data-testid="stSidebar"] textarea {
+        background-color: #0F192D !important;
+        color: white !important;
+        border: 1px solid #333 !important;
+        border-radius: 10px !important;
+        padding: 1.5rem !important;
+    }
 
+    /* Buttons */
+    [data-testid="stSidebar"] button {
+        background-color: #292929 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: none !important;
+        padding: 0.2rem 0.7rem !important;
+        transition: background-color 0.3s ease;
+    }
+
+    [data-testid="stSidebar"] button:hover {
+        background-color: #005577 !important;
+        cursor: pointer;
+    }
+
+    /* Titles or headers in sidebar */
+    [data-testid="stSidebar"] h1, 
+    [data-testid="stSidebar"] h2, 
+    [data-testid="stSidebar"] h3 {
+        color: #00E5FF  !important;
+        margin-top: 1.5rem;
+    }
+
+    /* Optional: Add a border line at the bottom of each section */
+    [data-testid="stSidebar"] .block-container > div {
+        border-bottom: 1px solid #333;
+        padding-bottom: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    
     /* All Titles and Markdown Text*/
     h1 {
         color: white !important;
@@ -75,8 +120,8 @@ st.markdown(
 
     /* Optional: tweak background */
     div[data-testid="stAlert"] {
-        background-color: rgba(255, 255, 150, 0.1) !important;
-        border-left: 5px solid #facc15 !important;
+        background-color: #00FFC640 !important;
+        border-left: 5px solid #00FFC6 !important;
         color: #ffffff;
     }
     a {
@@ -86,7 +131,7 @@ st.markdown(
 
     /* Optional: change link color on hover */
     a:hover {
-        color: #facc15 !important;  /* light yellow hover */
+        color: #38BDF8 !important;  /* light yellow hover */
     }
 
     /* Make the top header bar transparent */
@@ -107,46 +152,7 @@ st.markdown(
         color: white !important;
         font-weight: 800;
     }
-    /* Inputs */
-    [data-testid="stSidebar"] input,
-    [data-testid="stSidebar"] select,
-    [data-testid="stSidebar"] textarea {
-        background-color: #1f1f1f !important;
-        color: white !important;
-        border: 1px solid #333 !important;
-        border-radius: 10px !important;
-        padding: 1.5rem !important;
-    }
-
-    /* Buttons */
-    [data-testid="stSidebar"] button {
-        background-color: #292929 !important;
-        color: white !important;
-        border-radius: 10px !important;
-        border: none !important;
-        padding: 0.6rem 1rem !important;
-        transition: background-color 0.3s ease;
-    }
-
-    [data-testid="stSidebar"] button:hover {
-        background-color: #444 !important;
-        cursor: pointer;
-    }
-
-    /* Titles or headers in sidebar */
-    [data-testid="stSidebar"] h1, 
-    [data-testid="stSidebar"] h2, 
-    [data-testid="stSidebar"] h3 {
-        color: #f39c16 !important;
-        margin-top: 1.5rem;
-    }
-
-    /* Optional: Add a border line at the bottom of each section */
-    [data-testid="stSidebar"] .block-container > div {
-        border-bottom: 1px solid #333;
-        padding-bottom: 2rem;
-        margin-bottom: 2rem;
-    }
+    
     </style>
 
 
@@ -159,7 +165,7 @@ def set_background():
     """
     Set a full-page background image in Streamlit using a web link.
     """
-    image_url = "https://images.unsplash.com/photo-1650473395434-8674d953ef2f?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    image_url = "https://wallpaperaccess.com/full/2454628.png"
     
     bg_image = f"""
     <style>
@@ -168,7 +174,7 @@ def set_background():
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
-            background-color: black;
+            background-color: 0A0F1C;
         }}
         
         /* Styling interactive elements */
@@ -180,7 +186,7 @@ def set_background():
 
         
         .stButton > button:hover {{
-            background-color: #ff9800 !important;
+            background-color: #006d8e  !important;
             color: white !important;
             transform: scale(1.05);
         }}
@@ -228,10 +234,22 @@ def display_issues(issues):
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages","Project by Language", "Find Projects", "Profile Visualization"])
+with st.sidebar:
+    if st.button("Home"):
+        st.session_state.page = "Home"
+    if st.button("GitHub Login"):
+        st.session_state.page = "GitHub Login"
+    if st.button("Your Top Languages"):
+        st.session_state.page = "Your Top Languages"
+    if st.button("Project by Language"):
+        st.session_state.page = "Project by Language"
+    if st.button("Find Projects"):
+        st.session_state.page = "Find Projects"
+    if st.button("Profile Visualization"):
+        st.session_state.page = "Profile Visualization"
 
 # Home Page
-if page == "Home":
+if st.session_state.page == "Home":
     st.markdown(
         """
         <style>
@@ -242,18 +260,27 @@ if page == "Home":
                 height: 65vh;
                 text-align: center;
                 flex-direction: column;
-                color: #FFFFFF;
+                color: #E0F7FA;
             }
 
             .text-box {
-                background-color: #28025330; /* Black with 50% opacity */
+                background-color: #0F192DCC; /* Deep navy-blue with opacity */
                 padding: 30px;
                 border-radius: 15px;
-                
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
                 max-width: 80%;
             }
+
+            .text-box h1 {
+                color: #00E5FF;
+            }
+
+            .text-box p {
+                font-size: 22px;
+                color: #A0D7F3;
+            }
         </style>
+
 
         <div class="center-container">
             <div class="text-box">
@@ -267,9 +294,9 @@ if page == "Home":
 
 
 # GitHub Login Page
-elif page == "GitHub Login":
+elif st.session_state.page == "GitHub Login":
     
-    st.title("🔑 Log in with GitHub")
+    st.title(":material/login: Log in with GitHub")
     st.write("Enter your GitHub Personal Access Token (PAT) to proceed.")
 
     if "help_visible" not in st.session_state:
@@ -280,11 +307,11 @@ elif page == "GitHub Login":
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        pat = st.text_input("🔐 GitHub Personal Access Token", type="password", key="github_pat")
+        pat = st.text_input("GitHub Personal Access Token", type="password", key="github_pat")
 
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("❓ Help"):
+        if st.button(":material/help: Help"):
             st.session_state.help_visible = not st.session_state.help_visible
 
     if st.session_state.help_visible:
@@ -322,7 +349,7 @@ elif page == "GitHub Login":
             st.warning("Please enter your GitHub Personal Access Token.")
 
 # Your Top Languages Page
-elif page == "Your Top Languages":
+elif st.session_state.page == "Your Top Languages":
     st.title("📊 Your Top Languages")
     st.write("This section will display your most used programming languages.")
 
@@ -356,8 +383,8 @@ elif page == "Your Top Languages":
 
 
 # project by languages
-elif page == "Project by Language":
-    st.title("🎯 Repositories by Language")
+elif st.session_state.page == "Project by Language":
+    st.title(":material/folder_code: Repositories by Language")
 
     top_languages = st.session_state.get("top_languages", [])
     all_languages = st.session_state.get("all_languages", [])
@@ -388,7 +415,7 @@ elif page == "Project by Language":
         st.warning(" select at least one language.")
 
 # Find Projects Page
-elif page == "Find Projects":
+elif st.session_state.page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
     prompt = st.text_input("What kind of projects are you looking for to contribute? ")
@@ -414,7 +441,7 @@ elif page == "Find Projects":
         display_issues(json_data)
 
 # Profile Visualization Page
-elif page == "Profile Visualization":
+elif st.session_state.page == "Profile Visualization":
     st.title("📊 Visualize Your GitHub Profile")
     st.write("This section will generate interactive visualizations of your GitHub activity.")
     #use stored pat
