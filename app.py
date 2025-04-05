@@ -9,7 +9,6 @@ from utils.github_api import set_token
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from utils.github_api import search_repositories_by_language
 from gemini import parse_user_prompt, get_filters, build_issue_query, find_github_issues
-from display_issues import display_issues
 
 # Set Page Title and Layout
 st.set_page_config(page_title="Commit-Connect", page_icon="🔍", layout="wide")
