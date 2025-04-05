@@ -80,42 +80,6 @@ st.markdown(
         margin-bottom: 2rem;
     }
 
-    
-    /* All Titles and Markdown Text*/
-    h1 {
-        color: white !important;
-    }
-    .stMarkdown h1, .stMarkdown p {
-        color: white !important;
-    }
-    h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 ,, h4, .stMarkdown h4, h5, .stMarkdown h5, h6, .stMarkdown h6{
-        color: white !important;
-    }
-
-    ul, ul li, ol, ol li {
-        color: white !important;
-    }
-
-    /* Apply white to anything that might behave like a subheader */
-    div[data-testid="stVerticalBlock"] h2 {
-        color: white !important;
-    }
-
-    /* Make input label white */
-    div[data-testid="stTextInput"] label {
-        color: white !important;
-    }
-
-    /*Make selectbox label white*/
-    div[data-testid="stMultiSelect"] label {
-        color: white !important;
-    }
-
-    /*Make slider label white*/
-    div[data-testid="stSlider"] label {
-        color: white !important;
-    }
-
     /* Style Streamlit warning box text */
     div[data-testid="stAlert"] * {
         color: #ffffff !important;
@@ -123,8 +87,8 @@ st.markdown(
 
     /* Optional: tweak background */
     div[data-testid="stAlert"] {
-        background-color: #00FFC640 !important;
-        border-left: 5px solid #00FFC6 !important;
+        
+        border-left: 5px solid !important;
         color: #ffffff;
     }
     a {
@@ -132,9 +96,9 @@ st.markdown(
         text-decoration: underline; /* optional: makes links more visible */
     }
 
-    /* Optional: change link color on hover */
+    /Change link color on hover */
     a:hover {
-        color: #38BDF8 !important;  /* light yellow hover */
+        color: #38BDF8 !important;  
     }
 
     /* Make the top header bar transparent */
@@ -143,21 +107,7 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* Make the buttons and icons in the header white */
-    header[data-testid="stHeader"] svg {
-        fill: white !important;
-        stroke: white !important;
-    }
-
-    /* Make the text labels black (e.g., "Deploy", "⋮") */
-    header[data-testid="stHeader"] button span,
-    header[data-testid="stHeader"] div[role="button"] span {
-        color: white !important;
-        font-weight: 800;
-    }
-    
     </style>
-
 
     """,
     unsafe_allow_html=True
@@ -242,12 +192,12 @@ with st.sidebar:
         st.session_state.page = "Home"
     if st.button("GitHub Login"):
         st.session_state.page = "Login"
+    if st.button("Your Top Languages"):
+        st.session_state.page = "Your Top Languages"
     if st.button("Projects For You"):
         st.session_state.page = "Get Projects"
     if st.button("Smart Issue Recs"):
         st.session_state.page = "Find Projects"
-    if st.button("Your Top Languages"):
-        st.session_state.page = "Your Top Languages"
     if st.button("Profile"):
         st.session_state.page = "Profile Visualization"
 
@@ -397,68 +347,82 @@ elif st.session_state.page == "Your Top Languages":
 elif st.session_state.page == "Get Projects":
     st.title(":material/folder_code: Get matched with projects that fit your profile, perfectly.")
 
-    #sort_by = st.selectbox("🔽 Sort Repositories By", ["stars", "forks", "updated"])
-     #order = st.radio("📈 Order", ["desc (High to Low)", "asc (Low to High)"])
-    #order = "desc" if "desc" in order else "asc"" """
-   
-    sort_option = st.selectbox(
-    "🔽 Sort Repositories By",
-    [
-        "Best match",
-        "Most stars",
-        "Fewest stars",
-        "Most forks",
-        "Fewest forks",
-        "Recently updated",
-        "Least recently updated"
-    ]
-)
-    if sort_option == "Best match":
-        sort_by, order = None, None
-    elif sort_option == "Most stars":
-        sort_by, order = "stars", "desc"
-    elif sort_option == "Fewest stars":
-        sort_by, order = "stars", "asc"
-    elif sort_option == "Most forks":
-        sort_by, order = "forks", "desc"
-    elif sort_option == "Fewest forks":
-        sort_by, order = "forks", "asc"
-    elif sort_option == "Recently updated":
-        sort_by, order = "updated", "desc"
-    elif sort_option == "Least recently updated":
-        sort_by, order = "updated", "asc"
-
-
-
+    # Get top and all languages from session
     top_languages = st.session_state.get("top_languages", [])
     all_languages = st.session_state.get("all_languages", [])
 
-
-    if all:
-        st.success(f"🔍 Searching using your favorite languages: {', '.join(all_languages)}")
-         # Let user choose from their top languages
+    if all_languages:
+        # 1. LANGUAGE FILTER (Always Visible)
         selected_languages = st.multiselect(
-            "🔎 Select languages to filter repositories:",
+            "🧠 Select languages to filter repositories:",
             all_languages,
             default=all_languages[:len(all_languages)]
         )
-    min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
-    recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
-    if st.button("🔍 Fetch Repositories"):
-            repos = search_repositories_by_language(languages=all_languages, min_stars= min_stars,recent_days =recent_days,sort_by=sort_by,
-            order=order)
+        # 2. ADVANCED FILTERS (Inside Expander)
+        with st.expander("⚙️ Advanced Filters"):
+            sort_option = st.selectbox(
+                "🔽 Sort Repositories By",
+                [
+                    "Best match",
+                    "Most stars",
+                    "Fewest stars",
+                    "Most forks",
+                    "Fewest forks",
+                    "Recently updated",
+                    "Least recently updated"
+                ]
+            )
 
-            if "error" in repos:
-                st.error(repos["error"])
-            elif len(repos) == 0:
-                st.info("No repositories matched the selected filters.")
+            if sort_option == "Best match":
+                sort_by, order = None, None
+            elif sort_option == "Most stars":
+                sort_by, order = "stars", "desc"
+            elif sort_option == "Fewest stars":
+                sort_by, order = "stars", "asc"
+            elif sort_option == "Most forks":
+                sort_by, order = "forks", "desc"
+            elif sort_option == "Fewest forks":
+                sort_by, order = "forks", "asc"
+            elif sort_option == "Recently updated":
+                sort_by, order = "updated", "desc"
+            elif sort_option == "Least recently updated":
+                sort_by, order = "updated", "asc"
+
+            min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
+            min_forks = st.slider(" Minimum Forks", 0, 50, 0)
+            recent_days = st.slider("🕒 Updated Within (days)", 0, 800, 90)
+
+        # Defaults if not set
+        min_stars = min_stars if 'min_stars' in locals() else 0
+        recent_days = recent_days if 'recent_days' in locals() else 90
+
+        # 3. SEARCH BUTTON
+        if st.button("Fetch Repositories"):
+            if not selected_languages:
+                st.warning("Please select at least one language.")
             else:
-                st.success(f"Found {len(repos)} repositories:")
-                for repo in repos:
-                    st.markdown(f"🔗 [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']} | 🧠 {repo['language']} | 🕒 Updated: {repo['updated_at'][:10]}")
+                repos = search_repositories_by_language(
+                    languages=selected_languages,
+                    min_stars=min_stars,
+                    recent_days=recent_days,
+                    min_forks = min_forks,
+                    sort_by=sort_by,
+                    order=order
+                )
+                if "error" in repos:
+                    st.error(repos["error"])
+                elif len(repos) == 0:
+                    st.info("No repositories found.")
+                else:
+                    st.success(f"Found {len(repos)} repositories:")
+                    for repo in repos:
+                        st.markdown(
+                            f"🔗 [{repo['name']}]({repo['html_url']}) — Languages: {repo['language']} "
+                            f"| Stars: {repo['stargazers_count']}| Forks: {repo['forks_count']} Updated: {repo['updated_at'][:10]}"
+                        )
     else:
-        st.warning(" select at least one language.")
+        st.warning("No languages found in session. Please load your GitHub profile first.")
 
 # Find Projects Page
 elif st.session_state.page == "Find Projects":
@@ -570,6 +534,7 @@ elif st.session_state.page == "Profile Visualization":
         st.stop()
 
     if st.button("Fetch Data"):
+    # Fetch GitHub Data
         url = f"https://api.github.com/user"
         response = requests.get(url, headers=headers)
 
