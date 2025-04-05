@@ -75,8 +75,8 @@
 ## 🎬 Demo Video
 
 > Get a quick walkthrough of Commit-Connect in action!
-
-[![Watch the Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+> 
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-red?style=for-the-badge&logo=google-drive)](https://drive.google.com/drive/folders/1LqvGvj5dxSUWDqA3ai6ZpwTj0Pe9t4pG)
 
 🔗 [Watch on YouTube](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 
