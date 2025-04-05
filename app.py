@@ -488,6 +488,10 @@ elif st.session_state.page == "Profile Visualization":
         headers = {"Authorization": f"token {pat}"}
 
     if st.button("Fetch Data"):
+        if not ("pat" in st.session_state and st.session_state.pat):
+            st.error("Please login first.")
+            
+
     # Fetch GitHub Data
         url = f"https://api.github.com/user"
         response = requests.get(url, headers=headers)
