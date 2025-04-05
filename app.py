@@ -263,12 +263,12 @@ with st.sidebar:
         st.session_state.page = "Home"
     if st.button("GitHub Login"):
         st.session_state.page = "Login"
+    if st.button("Your Top Languages"):
+        st.session_state.page = "Your Top Languages"
     if st.button("Projects For You"):
         st.session_state.page = "Get Projects"
     if st.button("Smart Issue Recs"):
         st.session_state.page = "Find Projects"
-    if st.button("Your Top Languages"):
-        st.session_state.page = "Your Top Languages"
     if st.button("Profile"):
         st.session_state.page = "Profile Visualization"
 
@@ -550,7 +550,7 @@ elif st.session_state.page == "Find Projects":
             recent_days=recent_days
         )
         total_issues = len(json_data)
-        
+
         st.markdown(f"### Showing {total_issues} issues")
         display_issues(json_data)
 
