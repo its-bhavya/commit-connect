@@ -471,10 +471,6 @@ elif st.session_state.page == "Find Projects":
     "🔽 Sort Results By",
     [
         "Best match",
-        "Most stars",
-        "Fewest stars",
-        "Most forks",
-        "Fewest forks",
         "Recently updated",
         "Least recently updated"
     ]
@@ -482,23 +478,18 @@ elif st.session_state.page == "Find Projects":
 
     if sort_option == "Best match":
         sort_by, order = None, None
-    elif sort_option == "Most stars":
-        sort_by, order = "stars", "desc"
-    elif sort_option == "Fewest stars":
-        sort_by, order = "stars", "asc"
-    elif sort_option == "Most forks":
-        sort_by, order = "forks", "desc"
-    elif sort_option == "Fewest forks":
-        sort_by, order = "forks", "asc"
     elif sort_option == "Recently updated":
         sort_by, order = "updated", "desc"
     elif sort_option == "Least recently updated":
         sort_by, order = "updated", "asc"
+    
 
+    
+    state_filter = st.selectbox("Issue State", ["open", "closed"])
+    assignment_filter = st.selectbox("Assignment", ["all", "assigned", "unassigned"])
+    st.markdown(f"🔍 Showing **{state_filter}** issues that are **{assignment_filter}**")
 
-
-    # ⭐ Minimum stars slider
-    min_stars = st.slider("⭐ Minimum Stars", 0, 1000, 0)
+    
 
     # 🕒 Recently updated slider
     recent_days = st.slider("🕒 Updated within (days)", 0, 365, 90)
@@ -510,7 +501,8 @@ elif st.session_state.page == "Find Projects":
         #query, query_url = build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
         #st.write(query)
         json_data = find_github_issues(user_input=prompt,
-            min_stars=min_stars,
+            state=state_filter,
+            assigned=assignment_filter,
             recent_days=recent_days
         )
         total_issues = len(json_data)

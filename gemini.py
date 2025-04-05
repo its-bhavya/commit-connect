@@ -5,6 +5,7 @@ import json
 import re
 import requests
 import urllib
+import urllib.parse
 import streamlit as st
 from datetime import datetime, timedelta
 
@@ -134,8 +135,16 @@ def get_filters(text:str):
 
     return languages, frameworks_libraries, tools, difficulty, filters
 
-def build_issue_query(languages, frameworks, tools, difficulty, filters,min_stars=0, recent_days=90,sort_by=None, sort_order='desc'):
+def build_issue_query(languages, frameworks, tools, difficulty, filters,state="open", assigned="all", recent_days=90,sort_by=None, sort_order='desc'):
     query_parts = []
+
+    query_parts.append(f"is:issue is:{state}")
+
+    if assigned == "assigned":
+        query_parts.append("assignee:*")
+    elif assigned == "unassigned":
+        query_parts.append("no:assignee")
+
 
     # Add languages
     if languages:
@@ -172,9 +181,6 @@ def build_issue_query(languages, frameworks, tools, difficulty, filters,min_star
         elif difficulty.lower() == "intermediate":
             query_parts.append('label:"help wanted"')
     
-    # ⭐ Minimum stars
-    if min_stars > 0:
-        query_parts.append(f"stars:>={min_stars}")
 
     # 🕒 Updated within N days
     if recent_days > 0:
@@ -204,13 +210,16 @@ def fetch_issues_from_github(query_url):
     else:
         return {"error": f"GitHub API error {response.status_code}: {response.text}"}
 
-def find_github_issues(user_input,sort_by=None, sort_order='desc',min_stars=0, recent_days=90):
+def find_github_issues(user_input,state="open", assigned="all",sort_by=None, sort_order='desc', recent_days=90):
     # Parse the prompt
     languages, frameworks, tools, difficulty, filters = get_filters(user_input)
 
     # Build query
-    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters, min_stars=min_stars, recent_days=recent_days,
-        sort_by=sort_by, sort_order=sort_order)
+    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters,state=state,
+        assigned=assigned,
+        recent_days=recent_days,
+        sort_by=sort_by, 
+        sort_order=sort_order)
 
     # Fetch results
     results = fetch_issues_from_github(query_url)
