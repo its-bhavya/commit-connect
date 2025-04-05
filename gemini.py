@@ -202,3 +202,35 @@ def find_github_issues(user_input):
 
     return results
 
+def summarize_issue(issue_body: str) -> str:
+    # Initialize Gemini
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    
+    # Prompt template
+    prompt = f"""
+You are an expert assistant helping beginners understand GitHub issues. Given the following GitHub issue description written in markdown, generate a beginner-friendly **markdown-formatted summary**.
+
+The summary should include:
+
+## 📝 What the Issue is About
+- Explain clearly what the issue is addressing or asking for.
+
+## 🛠️ Languages & Frameworks Involved
+- List the programming languages, libraries, and tools likely required to solve it.
+- Add a note: "⚠️ There may be multiple or different valid approaches to solving this issue depending on your tech stack and preferences."
+
+## 📌 Important Details
+- Mention anything that is key to understanding or solving the issue — like requirements, constraints, or examples provided.
+
+## 📘 Glossary of Terms
+- Identify and explain any technical terms or acronyms found in the issue to help beginners.
+
+Here is the issue body:
+\"\"\"
+{issue_body}
+\"\"\"
+"""
+
+    # Run the model
+    response = model.generate_content(prompt)
+    return response.text
