@@ -134,7 +134,7 @@ def get_filters(text:str):
 
     return languages, frameworks_libraries, tools, difficulty, filters
 
-def build_issue_query(languages, frameworks, tools, difficulty, filters,min_stars=0, recent_days=90):
+def build_issue_query(languages, frameworks, tools, difficulty, filters,min_stars=0, recent_days=90,sort_by=None, sort_order='desc'):
     query_parts = []
 
     # Add languages
@@ -186,6 +186,9 @@ def build_issue_query(languages, frameworks, tools, difficulty, filters,min_star
     query = " ".join(query_parts)
     encoded_query = urllib.parse.quote_plus(query)
     url = f"https://api.github.com/search/issues?q={encoded_query}"
+    if sort_by:
+        url += f"&sort={sort_by}&order={sort_order}"
+
     return query, url 
 
 @st.cache_data
@@ -201,12 +204,13 @@ def fetch_issues_from_github(query_url):
     else:
         return {"error": f"GitHub API error {response.status_code}: {response.text}"}
 
-def find_github_issues(user_input,min_stars=0, recent_days=90):
+def find_github_issues(user_input,sort_by=None, sort_order='desc',min_stars=0, recent_days=90):
     # Parse the prompt
     languages, frameworks, tools, difficulty, filters = get_filters(user_input)
 
     # Build query
-    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters, min_stars, recent_days)
+    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters, min_stars=min_stars, recent_days=recent_days,
+        sort_by=sort_by, sort_order=sort_order)
 
     # Fetch results
     results = fetch_issues_from_github(query_url)

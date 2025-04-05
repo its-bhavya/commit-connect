@@ -47,7 +47,7 @@ def get_language_distribution(repos):
 
 # fecting repo by language 
 
-def search_repositories_by_language(languages=None, min_stars=0, recent_days=90):
+def search_repositories_by_language(languages=None, min_stars=0, recent_days=90,sort_by="stars", order="desc"):
     """
     Search public repositories on GitHub based on language, stars, and updated date.
     :param token: GitHub Personal Access Token
@@ -70,8 +70,10 @@ def search_repositories_by_language(languages=None, min_stars=0, recent_days=90)
     results = []
     for lang in languages:
         query = f"language:{lang} stars:>={min_stars} pushed:>={recent_cutoff}"
-        url = f"https://api.github.com/search/repositories?q={query}&sort=stars&order=desc&per_page=20"
-
+        url = f"https://api.github.com/search/repositories?q={query}"
+        if sort_by and order:
+            url += f"&sort={sort_by}&order={order}"
+            url += "&per_page=50"
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
