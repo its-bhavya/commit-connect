@@ -34,6 +34,76 @@ st.markdown(
         padding-bottom: 0.5vh;
     }
 
+    /* All Titles and Markdown Text*/
+    h1 {
+        color: white !important;
+    }
+    .stMarkdown h1, .stMarkdown p {
+        color: white !important;
+    }
+    h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 {
+        color: white !important;
+    }
+
+    /* Apply white to anything that might behave like a subheader */
+    div[data-testid="stVerticalBlock"] h2 {
+        color: white !important;
+    }
+
+    /* Make input label white */
+    div[data-testid="stTextInput"] label {
+        color: white !important;
+    }
+
+    /*Make selectbox label white*/
+    div[data-testid="stMultiSelect"] label {
+        color: white !important;
+    }
+
+    /*Make slider label white*/
+    div[data-testid="stSlider"] label {
+        color: white !important;
+    }
+
+    /* Style Streamlit warning box text */
+    div[data-testid="stAlert"] * {
+        color: #ffffff !important;
+    }
+
+    /* Optional: tweak background */
+    div[data-testid="stAlert"] {
+        background-color: rgba(255, 255, 150, 0.1) !important;
+        border-left: 5px solid #facc15 !important;
+        color: #ffffff;
+    }
+    a {
+        color: white !important;
+        text-decoration: underline; /* optional: makes links more visible */
+    }
+
+    /* Optional: change link color on hover */
+    a:hover {
+        color: #facc15 !important;  /* light yellow hover */
+    }
+
+    /* Make the top header bar transparent */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* Make the buttons and icons in the header white */
+    header[data-testid="stHeader"] svg {
+        fill: white !important;
+        stroke: white !important;
+    }
+
+    /* Make the text labels black (e.g., "Deploy", "⋮") */
+    header[data-testid="stHeader"] button span,
+    header[data-testid="stHeader"] div[role="button"] span {
+        color: white !important;
+        font-weight: 800;
+    }
     /* Inputs */
     [data-testid="stSidebar"] input,
     [data-testid="stSidebar"] select,
@@ -75,6 +145,8 @@ st.markdown(
         margin-bottom: 2rem;
     }
     </style>
+
+
     """,
     unsafe_allow_html=True
 )
@@ -95,10 +167,6 @@ def set_background():
             background-position: center;
             background-color: black;
         }}
-
-        
-    
-    
         
         /* Styling interactive elements */
         .stButton > button {{
@@ -138,28 +206,42 @@ page = st.sidebar.radio("Go to:", ["Home", "GitHub Login", "Your Top Languages",
 # Home Page
 if page == "Home":
     st.markdown(
-    """
-    <style>
-        .center-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 65vh; /* Adjust height as needed */
-            text-align: center;
-            flex-direction: column;
-        }
-    </style>
-    <div class="center-container">
-        <h1> Commit-Connect</h1>
-        <p style="font-size: 22px;">Find open-source projects that match your skills!</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """
+        <style>
+            .center-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 65vh;
+                text-align: center;
+                flex-direction: column;
+                color: #FFFFFF;
+            }
+
+            .text-box {
+                background-color: #28025330; /* Black with 50% opacity */
+                padding: 30px;
+                border-radius: 15px;
+                
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                max-width: 80%;
+            }
+        </style>
+
+        <div class="center-container">
+            <div class="text-box">
+                <h1>Commit-Connect</h1>
+                <p style="font-size: 22px;">Find open-source projects that match your skills!</p>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # GitHub Login Page
 elif page == "GitHub Login":
+    
     st.title("🔑 Log in with GitHub")
     st.write("Enter your GitHub Personal Access Token (PAT) to proceed.")
 
@@ -184,7 +266,7 @@ elif page == "GitHub Login":
             <div style="border-radius: 10px; background-color: #1e293b; padding: 15px; color: white;">
                 <h4>🔑 How to Generate a GitHub PAT?</h4>
                 <ol>
-                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank" style="color: #38bdf8;">GitHub Tokens</a></li>
                     <li>Click <b>'Generate new token'</b></li>
                     <li>Select <b>'repo'</b> and <b>'read:user'</b> scopes</li>
                     <li>Copy and paste it here</li>
@@ -199,7 +281,7 @@ elif page == "GitHub Login":
             set_token(pat)
             user_data = get_user_profile()
             if user_data:
-                st.session_state.pat = pat  # Store PAT in session state
+                st.session_state.pat = pat
                 st.success(f"Logged in as {user_data['login']}")
 
                 st.image(user_data["avatar_url"], width=100)
@@ -231,7 +313,7 @@ elif page == "Your Top Languages":
                 st.session_state.top_languages = top_languages  # 🔥 store it globally
 
                 # Display as a pie chart
-                st.subheader("🛠 Your Top Programming Languages")
+                st.markdown("<h3 style='color: white;'>🛠 Your Top Programming Languages</h3>", unsafe_allow_html=True)
                 fig, ax = plt.subplots()
                 ax.pie(lang_data.values(), labels=lang_data.keys(), autopct="%1.1f%%", startangle=140, colors=plt.cm.Paired.colors)
                 ax.axis("equal")  # Ensures pie chart is circular
@@ -274,7 +356,7 @@ elif page == "Project by Language":
 elif page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
-    prompt = st.chat_input("What kind of projects are you looking for to contribute? ")
+    prompt = st.text_input("What kind of projects are you looking for to contribute? ")
     if prompt:
         result = parse_user_prompt(prompt)
         #st.write(result)
@@ -284,15 +366,6 @@ elif page == "Find Projects":
         json_data = find_github_issues(user_input=prompt)
         total_issues = len(json_data)
 
-        if languages:
-            languages = ','.join(languages).title()
-        if frameworks_libraries:
-            frames = ','.join(frameworks_libraries).title()
-        if tools:
-            tools = ','.join(tools).title()
-        if filters:
-            filters = ",".join(filters).title()
-        
         st.markdown(f"### Showing {total_issues} issues")
         display_issues(json_data)
 
