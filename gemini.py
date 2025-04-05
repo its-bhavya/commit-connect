@@ -6,6 +6,7 @@ import re
 import requests
 import urllib
 import streamlit as st
+from datetime import datetime, timedelta
 
 genai_api_key= st.secrets["GEMINI_KEY"]
 #load_dotenv(find_dotenv())
@@ -133,7 +134,7 @@ def get_filters(text:str):
 
     return languages, frameworks_libraries, tools, difficulty, filters
 
-def build_issue_query(languages, frameworks, tools, difficulty, filters):
+def build_issue_query(languages, frameworks, tools, difficulty, filters,min_stars=0, recent_days=90):
     query_parts = []
 
     # Add languages
@@ -170,6 +171,16 @@ def build_issue_query(languages, frameworks, tools, difficulty, filters):
             query_parts.append('label:"good first issue"')
         elif difficulty.lower() == "intermediate":
             query_parts.append('label:"help wanted"')
+    
+    # ⭐ Minimum stars
+    if min_stars > 0:
+        query_parts.append(f"stars:>={min_stars}")
+
+    # 🕒 Updated within N days
+    if recent_days > 0:
+        since_date = datetime.today() - timedelta(days=recent_days)
+        query_parts.append(f"updated:>={since_date.date()}")
+
 
     # Final query
     query = " ".join(query_parts)
@@ -190,12 +201,12 @@ def fetch_issues_from_github(query_url):
     else:
         return {"error": f"GitHub API error {response.status_code}: {response.text}"}
 
-def find_github_issues(user_input):
+def find_github_issues(user_input,min_stars=0, recent_days=90):
     # Parse the prompt
     languages, frameworks, tools, difficulty, filters = get_filters(user_input)
 
     # Build query
-    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters)
+    query, query_url = build_issue_query(languages, frameworks, tools, difficulty, filters, min_stars, recent_days)
 
     # Fetch results
     results = fetch_issues_from_github(query_url)
