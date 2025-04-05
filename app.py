@@ -5,6 +5,7 @@ import html
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
 from utils.github_api import set_token
 from utils.github_api import get_user_profile, get_user_repos, get_language_distribution
 from utils.github_api import search_repositories_by_language
@@ -238,14 +239,14 @@ with st.sidebar:
     if st.button("Home"):
         st.session_state.page = "Home"
     if st.button("GitHub Login"):
-        st.session_state.page = "GitHub Login"
+        st.session_state.page = "Login"
+    if st.button("Projects For You"):
+        st.session_state.page = "Get Projects"
+    if st.button("Smart Issue Recs"):
+        st.session_state.page = "Find Projects"
     if st.button("Your Top Languages"):
         st.session_state.page = "Your Top Languages"
-    if st.button("Project by Language"):
-        st.session_state.page = "Project by Language"
-    if st.button("Find Projects"):
-        st.session_state.page = "Find Projects"
-    if st.button("Profile Visualization"):
+    if st.button("Profile"):
         st.session_state.page = "Profile Visualization"
 
 # Home Page
@@ -294,7 +295,7 @@ if st.session_state.page == "Home":
 
 
 # GitHub Login Page
-elif st.session_state.page == "GitHub Login":
+elif st.session_state.page == "Login":
     
     st.title(":material/login: Log in with GitHub")
     st.write("Enter your GitHub Personal Access Token (PAT) to proceed.")
@@ -308,17 +309,18 @@ elif st.session_state.page == "GitHub Login":
 
     with col1:
         pat = st.text_input("GitHub Personal Access Token", type="password", key="github_pat")
+        st.session_state.pat = pat
 
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button(":material/help: Help"):
+        if st.button("Help"):
             st.session_state.help_visible = not st.session_state.help_visible
 
     if st.session_state.help_visible:
         st.markdown(
             """
             <div style="border-radius: 10px; background-color: #1e293b; padding: 15px; color: white;">
-                <h4>🔑 How to Generate a GitHub PAT?</h4>
+                <h4> How to Generate a GitHub PAT?</h4>
                 <ol>
                     <li>Go to <a href="https://github.com/settings/tokens" target="_blank" style="color: #38bdf8;">GitHub Tokens</a></li>
                     <li>Click <b>'Generate new token'</b></li>
@@ -350,8 +352,7 @@ elif st.session_state.page == "GitHub Login":
 
 # Your Top Languages Page
 elif st.session_state.page == "Your Top Languages":
-    st.title("📊 Your Top Languages")
-    st.write("This section will display your most used programming languages.")
+    st.title(":material/award_star: Your Top Languages")
 
     # Check if PAT exists in session state
     if "pat" in st.session_state and st.session_state.pat:
@@ -368,23 +369,31 @@ elif st.session_state.page == "Your Top Languages":
                 st.session_state.top_languages = top_languages  #Store it globally
                 st.session_state.all_languages = all_languages
 
+                st.success(f"Top languages detected: {', '.join(top_languages)}")
+
                 # Display as a pie chart
-                st.markdown("<h3 style='color: white;'>🛠 Your Top Programming Languages</h3>", unsafe_allow_html=True)
-                fig, ax = plt.subplots()
-                ax.pie(lang_data.values(), labels=lang_data.keys(), autopct="%1.1f%%", startangle=140, colors=plt.cm.Paired.colors)
-                ax.axis("equal")  # Ensures pie chart is circular
+                fig, ax = plt.subplots(figsize=(4, 4))
+                wedges, texts, autotexts = ax.pie(
+                    lang_data.values(),
+                    labels=lang_data.keys(),
+                    autopct="%1.1f%%",
+                    startangle=140,
+                    colors=plt.cm.Paired.colors,
+                    wedgeprops={'edgecolor': 'white', 'linewidth': 2},
+                    textprops={'fontsize': 8},
+                )
+                ax.axis("equal")
                 st.pyplot(fig)
 
-                st.success(f"Top languages detected: {', '.join(top_languages)}")
             else:
                 st.info("No language data found in your repositories.")
     else:
-        st.warning("Please log in first on the 'GitHub Login' page.")
+        st.warning("Please log in first on the 'Login' page.")
 
 
-# project by languages
-elif st.session_state.page == "Project by Language":
-    st.title(":material/folder_code: Repositories by Language")
+# Get Projectss
+elif st.session_state.page == "Get Projects":
+    st.title(":material/folder_code: Get matched with projects that fit your profile, perfectly.")
 
     #sort_by = st.selectbox("🔽 Sort Repositories By", ["stars", "forks", "updated"])
      #order = st.radio("📈 Order", ["desc (High to Low)", "asc (Low to High)"])
@@ -451,9 +460,8 @@ elif st.session_state.page == "Project by Language":
 
 # Find Projects Page
 elif st.session_state.page == "Find Projects":
-    st.title("🔎 Find Open Source Projects")
-    st.write("This section will help you find open-source issues to contribute to.")
-    prompt = st.text_input("What kind of projects are you looking for to contribute? ")
+    st.title(":material/search: Describe your idea, and let AI fetch relevant open-source issues you can start with.")
+    prompt = st.text_input("What kind of projects are you looking for to contribute? ",placeholder="Can you suggest some beginner-friendly issues in Flask related projects?")
 
 
     sort_option = st.selectbox(
@@ -509,8 +517,7 @@ elif st.session_state.page == "Find Projects":
 
 # Profile Visualization Page
 elif st.session_state.page == "Profile Visualization":
-    st.title("📊 Visualize Your GitHub Profile")
-    st.write("This section will generate interactive visualizations of your GitHub activity.")
+    st.title(":material/bar_chart: Visualize Your GitHub Profile")
     #use stored pat
     if "pat" in st.session_state and st.session_state.pat:
         pat = st.session_state.pat
@@ -524,13 +531,14 @@ elif st.session_state.page == "Profile Visualization":
         if response.status_code == 200:
             user_data = response.json()
             username = user_data.get("login")
-            st.success(f"Logged in as: {username}")
             if username:
                     st.success(f"Logged in as: {username}")
+
        # get user repositories 
             repo_response = requests.get(f"https://api.github.com/users/{username}/repos", headers=headers)
             if repo_response.status_code == 200:
                 repos = repo_response.json()
+
         # Extract Data
             repo_names = [repo["name"] for repo in repos]
             stars = [repo["stargazers_count"] for repo in repos]
