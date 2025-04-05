@@ -497,7 +497,7 @@ elif st.session_state.page == "Profile Visualization":
     profile_bg = '''
     <style>
     [data-testid="stAppViewContainer"] {
-        background-image: url("https://img.freepik.com/free-vector/dark-gradient-background-with-copy-space_53876-99548.jpg?t=st=1743849597~exp=1743853197~hmac=52d9538a89f25a183bf9633bcb4aa2fd3d709e6c37f9f2ca0ea7a62e6e277934&w=1380");
+        background-image: url("https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-52393.jpg?t=st=1743850268~exp=1743853868~hmac=ac915d333e8a3f6c0049dd4406692545bcb321e4ad2f262524fc8f61776e6cc8&w=1800");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
