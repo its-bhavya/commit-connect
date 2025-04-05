@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import base64
-
+import html
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -42,6 +42,10 @@ st.markdown(
         color: white !important;
     }
     h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 {
+        color: white !important;
+    }
+
+    ul, ul li, ol, ol li {
         color: white !important;
     }
 
@@ -197,6 +201,24 @@ def set_background():
 
 set_background()
 
+def display_issues(issues):
+    # --- Display Issues ---
+    counter = 1
+    for issue in issues:
+        with st.container():
+            
+            st.markdown("<hr style='border: 1px solid #ccc;'>", unsafe_allow_html=True)
+            st.markdown(f"## Issue #{counter}")
+            
+            safe_title = html.escape(issue["title"])
+            st.markdown(f"🔗 [{safe_title}]({issue['html_url']}) | 🏷️ Labels: {', '.join([label['name'] for label in issue['labels']]) if issue['labels'] else 'None'} | {issue['state'].capitalize()} | {"Assigned Already" if issue['assignees'] else 'Unassigned'}")
+            if issue['body']:
+                safe_body = html.escape(issue["body"])
+                st.write(f"{issue["body"]}")
+            counter += 1
+
+    st.markdown("---")
+    st.caption("All issues are displayed.")
 
 
 # Sidebar Navigation
