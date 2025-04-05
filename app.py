@@ -153,6 +153,29 @@ st.markdown(
         color: white !important;
         font-weight: 800;
     }
+    div[data-testid="stExpander"]  {
+            color: white !important;
+    }
+    div[data-baseweb="select"] > div {
+        color: black !important;
+    }
+
+    /* Dropdown menu background */
+    div[role="listbox"] {
+        background-color: white !important;
+    }
+
+    /* Text color for dropdown options */
+    div[role="option"] {
+        color: black !important;
+    }
+
+    /* Hovered option */
+    div[role="option"]:hover {
+        background-color: #f0f0f0 !important;
+        color: black !important;
+    }
+
     
     </style>
 
@@ -395,68 +418,84 @@ elif st.session_state.page == "Your Top Languages":
 elif st.session_state.page == "Get Projects":
     st.title(":material/folder_code: Get matched with projects that fit your profile, perfectly.")
 
-    #sort_by = st.selectbox("🔽 Sort Repositories By", ["stars", "forks", "updated"])
-     #order = st.radio("📈 Order", ["desc (High to Low)", "asc (Low to High)"])
-    #order = "desc" if "desc" in order else "asc"" """
-   
-    sort_option = st.selectbox(
-    "🔽 Sort Repositories By",
-    [
-        "Best match",
-        "Most stars",
-        "Fewest stars",
-        "Most forks",
-        "Fewest forks",
-        "Recently updated",
-        "Least recently updated"
-    ]
-)
-    if sort_option == "Best match":
-        sort_by, order = None, None
-    elif sort_option == "Most stars":
-        sort_by, order = "stars", "desc"
-    elif sort_option == "Fewest stars":
-        sort_by, order = "stars", "asc"
-    elif sort_option == "Most forks":
-        sort_by, order = "forks", "desc"
-    elif sort_option == "Fewest forks":
-        sort_by, order = "forks", "asc"
-    elif sort_option == "Recently updated":
-        sort_by, order = "updated", "desc"
-    elif sort_option == "Least recently updated":
-        sort_by, order = "updated", "asc"
-
-
-
+    # Get top and all languages from session
     top_languages = st.session_state.get("top_languages", [])
     all_languages = st.session_state.get("all_languages", [])
 
-
-    if all:
+    if all_languages:
         st.success(f"🔍 Searching using your favorite languages: {', '.join(all_languages)}")
-         # Let user choose from their top languages
+
+        # 1. LANGUAGE FILTER (Always Visible)
         selected_languages = st.multiselect(
-            "🔎 Select languages to filter repositories:",
+            "🧠 Select languages to filter repositories:",
             all_languages,
             default=all_languages[:len(all_languages)]
         )
-    min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
-    recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
-    if st.button("🔍 Fetch Repositories"):
-            repos = search_repositories_by_language(languages=all_languages, min_stars= min_stars,recent_days =recent_days,sort_by=sort_by,
-            order=order)
+        # 2. ADVANCED FILTERS (Inside Expander)
+        with st.expander("⚙️ Advanced Filters"):
+            sort_option = st.selectbox(
+                "🔽 Sort Repositories By",
+                [
+                    "Best match",
+                    "Most stars",
+                    "Fewest stars",
+                    "Most forks",
+                    "Fewest forks",
+                    "Recently updated",
+                    "Least recently updated"
+                ]
+            )
 
-            if "error" in repos:
-                st.error(repos["error"])
-            elif len(repos) == 0:
-                st.info("No repositories matched the selected filters.")
+            if sort_option == "Best match":
+                sort_by, order = None, None
+            elif sort_option == "Most stars":
+                sort_by, order = "stars", "desc"
+            elif sort_option == "Fewest stars":
+                sort_by, order = "stars", "asc"
+            elif sort_option == "Most forks":
+                sort_by, order = "forks", "desc"
+            elif sort_option == "Fewest forks":
+                sort_by, order = "forks", "asc"
+            elif sort_option == "Recently updated":
+                sort_by, order = "updated", "desc"
+            elif sort_option == "Least recently updated":
+                sort_by, order = "updated", "asc"
+
+            min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
+            min_forks = st.slider(" Minimum Forks", 0, 50, 0)
+            recent_days = st.slider("🕒 Updated Within (days)", 0, 800, 90)
+
+        # Defaults if not set
+        min_stars = min_stars if 'min_stars' in locals() else 0
+        recent_days = recent_days if 'recent_days' in locals() else 90
+
+        # 3. SEARCH BUTTON
+        if st.button("Fetch Repositories"):
+            if not selected_languages:
+                st.warning("Please select at least one language.")
             else:
-                st.success(f"Found {len(repos)} repositories:")
-                for repo in repos:
-                    st.markdown(f"🔗 [{repo['name']}]({repo['html_url']}) — ⭐ {repo['stargazers_count']} | 🧠 {repo['language']} | 🕒 Updated: {repo['updated_at'][:10]}")
+                repos = search_repositories_by_language(
+                    languages=selected_languages,
+                    min_stars=min_stars,
+                    recent_days=recent_days,
+                    min_forks = min_forks,
+                    sort_by=sort_by,
+                    order=order
+                )
+                if "error" in repos:
+                    st.error(repos["error"])
+                elif len(repos) == 0:
+                    st.info("No repositories found.")
+                else:
+                    st.success(f"Found {len(repos)} repositories:")
+                    for repo in repos:
+                        st.markdown(
+                            f"🔗 [{repo['name']}]({repo['html_url']}) — Languages: {repo['language']} "
+                            f"| Stars: {repo['stargazers_count']}| Forks: {repo['forks_count']} Updated: {repo['updated_at'][:10]}"
+                        )
     else:
-        st.warning(" select at least one language.")
+        st.warning("No languages found in session. Please load your GitHub profile first.")
 
 # Find Projects Page
 elif st.session_state.page == "Find Projects":
@@ -511,7 +550,7 @@ elif st.session_state.page == "Find Projects":
             recent_days=recent_days
         )
         total_issues = len(json_data)
-
+        
         st.markdown(f"### Showing {total_issues} issues")
         display_issues(json_data)
 

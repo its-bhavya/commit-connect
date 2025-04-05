@@ -1,6 +1,7 @@
 import requests
 import streamlit as st
 from datetime import datetime, timedelta
+from urllib.parse import quote_plus
 
 
 # Store token here
@@ -47,7 +48,7 @@ def get_language_distribution(repos):
 
 # fecting repo by language 
 
-def search_repositories_by_language(languages=None, min_stars=0, recent_days=90,sort_by="stars", order="desc"):
+def search_repositories_by_language(languages=None, min_stars=0, recent_days=90,min_forks=0,sort_by="stars",order="desc"):
     """
     Search public repositories on GitHub based on language, stars, and updated date.
     :param token: GitHub Personal Access Token
@@ -56,7 +57,7 @@ def search_repositories_by_language(languages=None, min_stars=0, recent_days=90,
     :param recent_days: Updated within recent_days
     :return: List of recommended repositories
     """
-    global token
+    token = st.secrets["token"]
     if not languages:
         return {"error": "Please provide at least one language."}
 
@@ -69,11 +70,15 @@ def search_repositories_by_language(languages=None, min_stars=0, recent_days=90,
 
     results = []
     for lang in languages:
-        query = f"language:{lang} stars:>={min_stars} pushed:>={recent_cutoff}"
-        url = f"https://api.github.com/search/repositories?q={query}"
+        query = f"language:{lang} stars:>={min_stars} forks:>={min_forks} pushed:>={recent_cutoff}"
+        encoded_query = quote_plus(query)  # This will encode spaces to '+'
+        
+        url = f"https://api.github.com/search/repositories?q={encoded_query}"
+        
         if sort_by and order:
             url += f"&sort={sort_by}&order={order}"
-            url += "&per_page=50"
+        url += "&per_page=50"
+
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
