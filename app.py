@@ -359,8 +359,42 @@ elif page == "Your Top Languages":
 elif page == "Project by Language":
     st.title("🎯 Repositories by Language")
 
+    #sort_by = st.selectbox("🔽 Sort Repositories By", ["stars", "forks", "updated"])
+     #order = st.radio("📈 Order", ["desc (High to Low)", "asc (Low to High)"])
+    #order = "desc" if "desc" in order else "asc"" """
+   
+    sort_option = st.selectbox(
+    "🔽 Sort Repositories By",
+    [
+        "Best match",
+        "Most stars",
+        "Fewest stars",
+        "Most forks",
+        "Fewest forks",
+        "Recently updated",
+        "Least recently updated"
+    ]
+)
+    if sort_option == "Best match":
+        sort_by, order = None, None
+    elif sort_option == "Most stars":
+        sort_by, order = "stars", "desc"
+    elif sort_option == "Fewest stars":
+        sort_by, order = "stars", "asc"
+    elif sort_option == "Most forks":
+        sort_by, order = "forks", "desc"
+    elif sort_option == "Fewest forks":
+        sort_by, order = "forks", "asc"
+    elif sort_option == "Recently updated":
+        sort_by, order = "updated", "desc"
+    elif sort_option == "Least recently updated":
+        sort_by, order = "updated", "asc"
+
+
+
     top_languages = st.session_state.get("top_languages", [])
     all_languages = st.session_state.get("all_languages", [])
+
 
     if all:
         st.success(f"🔍 Searching using your favorite languages: {', '.join(all_languages)}")
@@ -374,7 +408,8 @@ elif page == "Project by Language":
     recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
     if st.button("🔍 Fetch Repositories"):
-            repos = search_repositories_by_language(languages=all_languages, min_stars= min_stars,recent_days =recent_days)
+            repos = search_repositories_by_language(languages=all_languages, min_stars= min_stars,recent_days =recent_days,sort_by=sort_by,
+            order=order)
 
             if "error" in repos:
                 st.error(repos["error"])
@@ -392,6 +427,38 @@ elif page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
     prompt = st.text_input("What kind of projects are you looking for to contribute? ")
+
+
+    sort_option = st.selectbox(
+    "🔽 Sort Results By",
+    [
+        "Best match",
+        "Most stars",
+        "Fewest stars",
+        "Most forks",
+        "Fewest forks",
+        "Recently updated",
+        "Least recently updated"
+    ]
+)
+
+    if sort_option == "Best match":
+        sort_by, order = None, None
+    elif sort_option == "Most stars":
+        sort_by, order = "stars", "desc"
+    elif sort_option == "Fewest stars":
+        sort_by, order = "stars", "asc"
+    elif sort_option == "Most forks":
+        sort_by, order = "forks", "desc"
+    elif sort_option == "Fewest forks":
+        sort_by, order = "forks", "asc"
+    elif sort_option == "Recently updated":
+        sort_by, order = "updated", "desc"
+    elif sort_option == "Least recently updated":
+        sort_by, order = "updated", "asc"
+
+
+
     # ⭐ Minimum stars slider
     min_stars = st.slider("⭐ Minimum Stars", 0, 1000, 0)
 
