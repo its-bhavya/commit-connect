@@ -392,13 +392,22 @@ elif page == "Find Projects":
     st.title("🔎 Find Open Source Projects")
     st.write("This section will help you find open-source issues to contribute to.")
     prompt = st.text_input("What kind of projects are you looking for to contribute? ")
+    # ⭐ Minimum stars slider
+    min_stars = st.slider("⭐ Minimum Stars", 0, 1000, 0)
+
+    # 🕒 Recently updated slider
+    recent_days = st.slider("🕒 Updated within (days)", 0, 365, 90)
+
     if prompt:
         result = parse_user_prompt(prompt)
         #st.write(result)
         languages, frameworks_libraries, tools, difficulty, filters = get_filters(prompt)
         #query, query_url = build_issue_query(languages, frameworks_libraries, tools, difficulty, filters)
         #st.write(query)
-        json_data = find_github_issues(user_input=prompt)
+        json_data = find_github_issues(user_input=prompt,
+            min_stars=min_stars,
+            recent_days=recent_days
+        )
         total_issues = len(json_data)
 
         st.markdown(f"### Showing {total_issues} issues")
