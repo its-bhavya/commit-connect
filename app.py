@@ -78,42 +78,6 @@ st.markdown(
         margin-bottom: 2rem;
     }
 
-    
-    /* All Titles and Markdown Text*/
-    h1 {
-        color: white !important;
-    }
-    .stMarkdown h1, .stMarkdown p {
-        color: white !important;
-    }
-    h2, h3, .stMarkdown h3, .stMarkdown h2, .block-container h2, section.main h2 ,, h4, .stMarkdown h4, h5, .stMarkdown h5, h6, .stMarkdown h6{
-        color: white !important;
-    }
-
-    ul, ul li, ol, ol li {
-        color: white !important;
-    }
-
-    /* Apply white to anything that might behave like a subheader */
-    div[data-testid="stVerticalBlock"] h2 {
-        color: white !important;
-    }
-
-    /* Make input label white */
-    div[data-testid="stTextInput"] label {
-        color: white !important;
-    }
-
-    /*Make selectbox label white*/
-    div[data-testid="stMultiSelect"] label {
-        color: white !important;
-    }
-
-    /*Make slider label white*/
-    div[data-testid="stSlider"] label {
-        color: white !important;
-    }
-
     /* Style Streamlit warning box text */
     div[data-testid="stAlert"] * {
         color: #ffffff !important;
@@ -121,8 +85,8 @@ st.markdown(
 
     /* Optional: tweak background */
     div[data-testid="stAlert"] {
-        background-color: #00FFC640 !important;
-        border-left: 5px solid #00FFC6 !important;
+        
+        border-left: 5px solid !important;
         color: #ffffff;
     }
     a {
@@ -130,9 +94,9 @@ st.markdown(
         text-decoration: underline; /* optional: makes links more visible */
     }
 
-    /* Optional: change link color on hover */
+    /Change link color on hover */
     a:hover {
-        color: #38BDF8 !important;  /* light yellow hover */
+        color: #38BDF8 !important;  
     }
 
     /* Make the top header bar transparent */
@@ -141,44 +105,7 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* Make the buttons and icons in the header white */
-    header[data-testid="stHeader"] svg {
-        fill: white !important;
-        stroke: white !important;
-    }
-
-    /* Make the text labels black (e.g., "Deploy", "⋮") */
-    header[data-testid="stHeader"] button span,
-    header[data-testid="stHeader"] div[role="button"] span {
-        color: white !important;
-        font-weight: 800;
-    }
-    div[data-testid="stExpander"]  {
-            color: white !important;
-    }
-    div[data-baseweb="select"] > div {
-        color: black !important;
-    }
-
-    /* Dropdown menu background */
-    div[role="listbox"] {
-        background-color: white !important;
-    }
-
-    /* Text color for dropdown options */
-    div[role="option"] {
-        color: black !important;
-    }
-
-    /* Hovered option */
-    div[role="option"]:hover {
-        background-color: #f0f0f0 !important;
-        color: black !important;
-    }
-
-    
     </style>
-
 
     """,
     unsafe_allow_html=True
@@ -423,8 +350,6 @@ elif st.session_state.page == "Get Projects":
     all_languages = st.session_state.get("all_languages", [])
 
     if all_languages:
-        st.success(f"🔍 Searching using your favorite languages: {', '.join(all_languages)}")
-
         # 1. LANGUAGE FILTER (Always Visible)
         selected_languages = st.multiselect(
             "🧠 Select languages to filter repositories:",
