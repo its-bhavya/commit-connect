@@ -309,8 +309,10 @@ elif page == "Your Top Languages":
             lang_data = get_language_distribution(repos)
 
             if lang_data:
-                top_languages = sorted(lang_data, key=lang_data.get, reverse=True)[:3]
-                st.session_state.top_languages = top_languages  # 🔥 store it globally
+                all_languages = sorted(lang_data, key=lang_data.get, reverse=True)
+                top_languages = all_languages[:3]
+                st.session_state.top_languages = top_languages  #Store it globally
+                st.session_state.all_languages = all_languages
 
                 # Display as a pie chart
                 st.markdown("<h3 style='color: white;'>🛠 Your Top Programming Languages</h3>", unsafe_allow_html=True)
@@ -331,19 +333,21 @@ elif page == "Project by Language":
     st.title("🎯 Repositories by Language")
 
     top_languages = st.session_state.get("top_languages", [])
+    all_languages = st.session_state.get("all_languages", [])
 
-    if top_languages:
-        st.success(f"🔍 Searching using your top languages: {', '.join(top_languages)}")
+    if all:
+        st.success(f"🔍 Searching using your favorite languages: {', '.join(all_languages)}")
          # Let user choose from their top languages
         selected_languages = st.multiselect(
             "🔎 Select languages to filter repositories:",
-            top_languages
+            all_languages,
+            default=all_languages[:len(all_languages)]
         )
     min_stars = st.slider("⭐ Minimum Stars", 0, 50, 0)
     recent_days = st.slider("🕒 Updated Within (days)", 0, 365, 90)
 
     if st.button("🔍 Fetch Repositories"):
-            repos = search_repositories_by_language(languages=top_languages, min_stars= min_stars,recent_days =recent_days)
+            repos = search_repositories_by_language(languages=all_languages, min_stars= min_stars,recent_days =recent_days)
 
             if "error" in repos:
                 st.error(repos["error"])
