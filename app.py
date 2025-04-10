@@ -309,7 +309,7 @@ elif st.session_state.page == "Your Top Languages":
         """
         <style>
         .stApp {
-            background-image: url("https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-52393.jpg?t=st=1743850268~exp=1743853868~hmac=ac915d333e8a3f6c0049dd4406692545bcb321e4ad2f262524fc8f61776e6cc8&w=1800"); /* Replace with your actual background URL */
+            background-image: url("https://images.unsplash.com/photo-1614851099511-773084f6911d?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Z3JhZGllbnQlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww"); /* Replace with your actual background URL */
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -526,7 +526,7 @@ elif st.session_state.page == "Profile Visualization":
     profile_bg = '''
     <style>
     [data-testid="stAppViewContainer"] {
-        background-image: url("https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-52393.jpg?t=st=1743850268~exp=1743853868~hmac=ac915d333e8a3f6c0049dd4406692545bcb321e4ad2f262524fc8f61776e6cc8&w=1800");
+        background-image: url("https://static.vecteezy.com/system/resources/previews/019/511/518/non_2x/blue-background-abstract-illustration-with-gradient-blur-design-free-vector.jpg");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -582,12 +582,22 @@ elif st.session_state.page == "Profile Visualization":
                     repo_names = [repo["name"] for repo in repos]
                     stars = [repo["stargazers_count"] for repo in repos]
                     forks = [repo["forks_count"] for repo in repos]
+                    languages = []
+                    for repo in repos:
+                        repo_name = repo["name"]
+                        lang_url = f"https://api.github.com/repos/{username}/{repo_name}/languages"
+                        lang_response = requests.get(lang_url, headers=headers)
+                        if lang_response.status_code == 200:
+                            lang_data = lang_response.json()
+                            languages.append(', '.join(lang_data.keys()))
+                        else:
+                            languages.append('')
 
                     # Convert to DataFrame
-                    df = pd.DataFrame({"Repository": repo_names, "Stars": stars, "Forks": forks})
+                    df = pd.DataFrame({"Repository": repo_names, "Languages": languages, "Stars": stars, "Forks": forks})
 
                     # 📊 Pretty Bar Chart for Stars
-                    st.subheader("⭐ Stars per Repository")
+                    st.subheader("Stars per Repository")
                     if not df.empty:
                         bar_fig = px.bar(
                             df.sort_values("Stars", ascending=False),
@@ -600,6 +610,12 @@ elif st.session_state.page == "Profile Visualization":
                             labels={"Stars": "Star Count", "Repository": "Repository Name"},
                         )
                         bar_fig.update_layout(
+                            xaxis=dict(
+                                range=[0, 20],
+                                tickmode='linear',
+                                tick0=0,
+                                dtick=1  # Ensures integer steps
+                            ),
                             plot_bgcolor="rgba(0,0,0,0)",
                             paper_bgcolor="rgba(0,0,0,0)",
                             font=dict(size=14),
@@ -613,7 +629,7 @@ elif st.session_state.page == "Profile Visualization":
                     st.subheader("📅 Commit History (Last 30 Days)")
                     commit_dates = []
 
-                    for repo in repos[:3]:  # Limit to first 3 repos to reduce API load
+                    for repo in repos:  # Limit to first 3 repos to reduce API load
                         repo_name = repo["name"]
                         commits_url = f"https://api.github.com/repos/{username}/{repo_name}/commits"
                         params = {"per_page": 100}
