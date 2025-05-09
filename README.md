@@ -41,37 +41,6 @@
 
 ---
 
-## 📁 Project Structure
-
-.
-├── .devcontainer/             # Development container configuration
-├── .streamlit/                # Streamlit configuration files
-│   ├── config.toml
-│   └── secrets.toml
-├── presentations/             # Project presentation materials
-├── resources/images/          # UI background and design images
-│   ├── BackgroundImage.jpg
-│   └── Home Background Image.jpg
-├── utils/                     # Utility modules
-│   ├── __init__.py
-│   └── github_api.py
-├── venv/                      # Virtual environment (excluded from version control)
-│   └── __init__.py
-├── .gitignore                 # Git ignore rules
-├── app.py                     # Main application entry point
-├── auth.py                    # Handles GitHub authentication
-├── gemini.py                  # Gemini API integration for prompt analysis
-├── pyproject.toml             # Python project configuration
-├── README.md                  # Project documentation
-├── requirements.txt           # Python dependencies
-├── test_auth.py               # Unit tests for auth module
-├── test_user_profile.py       # Unit tests for user profile functionalities
-
-
-
-
----
-
 ## 🎬 Demo Video
 
 > Get a quick walkthrough of Commit-Connect in action!
@@ -88,7 +57,7 @@
 | Name      | Responsibilities                          |
 |-----------|--------------------------------------------|
 | **Aakriti Sharma**   | UI/UX Design, Frontend Design|
-| **Bhavya**    | GEMINI API Integration,Prompt Engineering|
+| **Bhavya**    | GEMINI API Integration, Prompt Engineering|
 | **Deepti Yadav**    | Backend Development, GitHub API Integration |
 
 We are a team of passionate developers committed to making open source accessible and impactful.
